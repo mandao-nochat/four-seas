@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>四海日报</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(160deg, #ffffff 0%, #f8faff 40%, #f0f4ff 100%);
+            font-family: 'Inter', ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+            color: #000000;
+        }
+        .card {
+            max-width: 480px;
+            width: calc(100% - 3rem);
+            background: #ffffff;
+            border: 1px solid #e9e9eb;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.07), 0 4px 6px -4px rgba(0,0,0,0.05);
+            padding: 3rem 2.5rem;
+            text-align: center;
+        }
+        .logo {
+            width: 56px;
+            height: 56px;
+            margin: 0 auto 1.25rem;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #4D6BFE 0%, #6B8BFF 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-size: 1.5rem;
+            font-weight: 900;
+        }
+        h1 { font-size: 2rem; font-weight: 800; margin: 0 0 0.5rem; }
+        .sub { color: #6b7280; font-size: 0.95rem; margin: 0 0 2rem; }
+        .hint {
+            color: #9ca3af;
+            font-size: 0.85rem;
+            border-top: 1px dashed #e5e7eb;
+            padding-top: 1.25rem;
+            line-height: 1.7;
+        }
+    </style>
+</head>
+<body>
+    <main class="card">
+        <div class="logo">四</div>
+        <h1>四海日报</h1>
+        <p class="sub">每日群聊精华，陆续更新中</p>
+        <p class="hint">日报生成后将在此发布<br>首页占位 · 待接入日报列表</p>
+    </main>
+</body>
+</html>
