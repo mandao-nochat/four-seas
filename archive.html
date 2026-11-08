@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>历史日报 - 四海日报</title>
+    <meta name="description" content="四海日报·历史日报：搜话题、搜关键词、搜日期，找回往期每一篇。">
+    <link rel="icon" type="image/png" href="favicon.png">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/style.css');
+
+        body { background-color: #f5faff; color: #1f2937; }
+        .text-brand { color: #0369A1; }
+        .bg-brand { background-color: #0EA5E9; }
+        .font-wenkai { font-family: 'LXGW WenKai', 'Noto Serif SC', 'Songti SC', 'SimSun', serif; }
+
+        .bento-card {
+            background: #ffffff;
+            border: 1px solid #dbeefe;
+            border-radius: 1rem;
+            box-shadow: 0 1px 3px rgba(14, 165, 233, 0.05);
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 0.9rem 1.2rem 0.9rem 3rem;
+            border-radius: 0.9rem;
+            border: 1px solid #bae6fd;
+            background: #ffffff;
+            font-size: 0.95rem;
+            color: #1f2937;
+            outline: none;
+            transition: all 0.15s;
+        }
+        .search-box:focus { border-color: #0EA5E9; box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.12); }
+
+        .back-btn {
+            display: inline-flex; align-items: center; gap: 0.35rem;
+            font-size: 0.8rem; font-weight: 600; color: #0369A1;
+            padding: 0.4rem 0.8rem; border-radius: 9999px;
+            border: 1px solid #bae6fd; background: #ffffff;
+            transition: all 0.15s;
+        }
+        .back-btn:hover { background: #eff8ff; border-color: #0369A1; }
+
+        .day-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+        .read-btn {
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            padding: 0.45rem 1rem; border-radius: 0.6rem;
+            background: #eff8ff; color: #0369A1;
+            font-size: 0.78rem; font-weight: 700;
+            border: 1px solid #bae6fd;
+            transition: all 0.15s;
+        }
+        .read-btn:hover { background: #0EA5E9; color: #ffffff; border-color: transparent; }
+
+        .topic-row {
+            display: flex; align-items: baseline; justify-content: space-between; gap: 0.75rem;
+            padding: 0.55rem 0.2rem;
+            border-bottom: 1px dashed #dbeefe;
+            cursor: pointer;
+            transition: all 0.12s;
+        }
+        .topic-row:last-child { border-bottom: none; }
+        .topic-row:hover { background: #f5faff; border-radius: 0.5rem; }
+        .cat-chip {
+            flex-shrink: 0;
+            display: inline-flex; align-items: center;
+            padding: 0.1rem 0.55rem; border-radius: 9999px;
+            background: #eff8ff; color: #0369A1;
+            font-size: 0.68rem; font-weight: 700;
+            border: 1px solid #dbeefe;
+        }
+        mark { background: #FDF3D8; color: inherit; padding: 0 1px; border-radius: 2px; }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <div class="max-w-4xl mx-auto px-4 pt-4">
+        <a href="index.html" class="back-btn"><i class="fas fa-arrow-left text-xs"></i> 返回主页</a>
+    </div>
+
+    <main class="max-w-4xl mx-auto px-4 pb-12">
+
+        <header class="text-center pt-4 pb-5">
+            <h1 class="text-3xl sm:text-4xl font-black text-gray-900 tracking-wide font-wenkai">四海日报 · 历史日报</h1>
+            <p class="font-serif-cn text-sm sm:text-base text-gray-500 mt-3">
+                往期每一篇都在这里——搜话题、搜关键词、搜日期。
+            </p>
+        </header>
+
+        <!-- 搜索框 -->
+        <div class="relative mb-3">
+            <i class="fas fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-sky-400"></i>
+            <input id="searchInput" type="text" class="search-box" placeholder="搜话题、关键词、分类、日期（如：社保 / 长征 / 11-07）……" autocomplete="off">
+        </div>
+        <div class="flex items-center justify-between mb-6">
+            <span id="statLine" class="text-xs text-gray-400"></span>
+            <button id="clearBtn" class="text-xs text-gray-400 hover:text-brand hidden"><i class="fas fa-xmark"></i> 清空</button>
+        </div>
+
+        <!-- 日期分组列表 -->
+        <div id="dayList" class="space-y-8"></div>
+    </main>
+
+    <footer class="w-full py-6 border-t border-[#dbeefe] bg-white mt-4">
+        <div class="max-w-4xl mx-auto px-4 text-center">
+            <p class="text-gray-400 text-xs">四海翻腾云水怒，五洲震荡风雷激 · 四海日报 · <span id="footer-year"></span></p>
+        </div>
+    </footer>
+
+    <script src="assets/cases.js"></script>
+    <script src="assets/public_quotes.js"></script>
+    <script>
+        (function () {
+            document.getElementById('footer-year').textContent = new Date().getFullYear();
+
+            const CASES = window.CASES || [];
+            const input = document.getElementById('searchInput');
+            const statLine = document.getElementById('statLine');
+            const clearBtn = document.getElementById('clearBtn');
+            const dayList = document.getElementById('dayList');
+
+            const esc = (s) => String(s || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+            // 命中词高亮（先转义再标）
+            const hl = (s, q) => {
+                const e = esc(s);
+                if (!q) return e;
+                try { return e.replace(new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi'), '<mark>$1</mark>'); }
+                catch (err) { return e; }
+            };
+
+            // 全部日期 = REPORT_DATES ∪ 案例日期，倒序
+            const dates = [...new Set([...(window.REPORT_DATES || []), ...CASES.map(c => c.date)])].sort().reverse();
+
+            function render() {
+                const q = input.value.trim().toLowerCase();
+                clearBtn.classList.toggle('hidden', !q);
+                const match = (c) => !q || (c.title + ' ' + (c.keywords || []).join(' ') + ' ' + (c.climb || '') + ' ' + (c.category || '') + ' ' + c.date).toLowerCase().includes(q);
+
+                let dayCount = 0, topicCount = 0;
+                const html = [];
+
+                for (const date of dates) {
+                    const dayCases = CASES.filter(c => c.date === date && match(c));
+                    // 空查询：显示全部；有查询：该日无命中则整日隐藏（日期本身命中则显示全日）
+                    if (q && !dayCases.length && !date.includes(q)) continue;
+                    dayCount++;
+                    topicCount += dayCases.length;
+
+                    html.push('<section class="bento-card p-5 sm:p-6">');
+                    html.push('<div class="day-head mb-3">');
+                    html.push('<div><span class="text-lg font-black text-gray-900 font-mono">' + esc(date) + '</span>');
+                    html.push('<span class="text-xs text-gray-400 ml-2">' + (q ? '命中 ' + dayCases.length + ' 个话题' : dayCases.length + ' 个话题') + '</span></div>');
+                    html.push('<a class="read-btn" href="fourseas_daily_' + esc(date) + '.html" target="_blank" rel="noopener"><i class="fas fa-book-open text-[10px]"></i> 阅读这期日报</a>');
+                    html.push('</div>');
+
+                    if (!dayCases.length) {
+                        html.push('<p class="text-sm text-gray-400 py-2">本日话题卡待补，可直接阅读日报原文。</p>');
+                    } else {
+                        html.push('<div>');
+                        for (const c of dayCases) {
+                            html.push('<div class="topic-row" onclick="location.href=\'fourseas_daily_' + esc(date) + '.html\'">');
+                            html.push('<span class="text-[15px] font-bold text-gray-800 font-wenkai leading-snug">' + hl(c.title, input.value.trim()) + '</span>');
+                            html.push('<span class="cat-chip">' + esc(c.category || '群聊') + '</span>');
+                            html.push('</div>');
+                        }
+                        html.push('</div>');
+                    }
+                    html.push('</section>');
+                }
+
+                if (!dayCount) {
+                    html.push('<div class="text-center text-gray-400 py-16"><i class="fas fa-magnifying-glass text-2xl mb-3 block"></i>没搜到相关内容，换个词试试</div>');
+                }
+                dayList.innerHTML = html.join('');
+                statLine.textContent = dayCount + ' 天 · ' + topicCount + ' 个话题';
+            }
+
+            input.addEventListener('input', render);
+            clearBtn.addEventListener('click', function () { input.value = ''; render(); input.focus(); });
+            render();
+        })();
+    </script>
+</body>
+</html>
