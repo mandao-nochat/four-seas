@@ -2135,8 +2135,8 @@
     }
 
     function getReportPublicUrl(dateIso = extractReportDateIso()) {
-        if (!dateIso) return 'https://mandao-nochat.github.io/four-seas/';
-        return `https://mandao-nochat.github.io/four-seas/${encodeURIComponent('fourseas_daily_' + dateIso + '.html')}`;
+        if (!dateIso) return 'https://sihai-ZY.github.io/four-seas/';
+        return `https://sihai-ZY.github.io/four-seas/${encodeURIComponent('fourseas_daily_' + dateIso + '.html')}`;
     }
 
     async function renderReportQr(target, url) {
@@ -2149,7 +2149,7 @@
                 return;
             }
         }
-        if (!url || url === 'https://mandao-nochat.github.io/four-seas/') {
+        if (!url || url === 'https://sihai-ZY.github.io/four-seas/') {
             console.warn('[截图] 无有效日报URL，跳过二维码生成。url=', url);
             return;
         }
