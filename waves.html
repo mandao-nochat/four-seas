@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>浪花集 - 四海日报</title>
+    <meta name="description" content="四海日报·浪花集：往期日报翻起的浪花——热议话题、有问必答与每日精选，一朵一朵看。">
+    <link rel="icon" type="image/png" href="favicon.png">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/style.css');
+
+        body { background-color: #f5faff; color: #1f2937; }
+        .text-brand { color: #0369A1; }
+        .bg-brand { background-color: #0EA5E9; }
+        .font-wenkai { font-family: 'LXGW WenKai', 'Noto Serif SC', 'Songti SC', 'SimSun', serif; }
+
+        .bento-card {
+            background: #ffffff;
+            border: 1px solid #dbeefe;
+            border-radius: 1rem;
+            box-shadow: 0 1px 3px rgba(14, 165, 233, 0.05);
+        }
+
+        .cat-card { cursor: pointer; position: relative; transition: all 0.15s; }
+        .cat-card:hover { transform: translateY(-2px); box-shadow: 0 8px 18px -6px rgba(14, 165, 233, 0.18); border-color: #bae6fd; }
+        .cat-card.active {
+            border-color: #0369A1;
+            background: linear-gradient(135deg, #eff8ff 0%, #f0f9ff 100%);
+            box-shadow: 0 0 0 2px rgba(3, 105, 161, 0.12) inset;
+        }
+
+        .view-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.4rem 0.9rem;
+            border-radius: 0.5rem;
+            font-size: 0.8rem;
+            font-weight: 700;
+            transition: all 0.15s;
+        }
+        .view-btn.active { background: #0369A1; color: #ffffff; box-shadow: 0 2px 8px rgba(3, 105, 161, 0.3); }
+        .view-btn:not(.active) { color: #6b7280; }
+        .view-btn:not(.active):hover { color: #0369A1; }
+
+        .grid-card { transition: transform 0.15s, box-shadow 0.15s; }
+        .grid-card:hover { transform: translateY(-3px); box-shadow: 0 16px 32px -10px rgba(14, 165, 233, 0.18); border-color: #bae6fd; }
+
+        .immersive-card { position: relative; }
+
+        .detail-text { transition: max-height 0.45s ease-in-out; }
+
+        .conclusion-block {
+            background: #eff8ff;
+            border: 1px solid #dbeefe;
+            border-left: 4px solid #0369A1;
+            border-radius: 0.5rem;
+        }
+        .quote-block {
+            background: #fffbeb;
+            border-left: 4px solid #f59e0b;
+            border-radius: 0 0.5rem 0.5rem 0;
+        }
+
+        .fade-mask {
+            background: linear-gradient(to top, #f5faff, rgba(245, 250, 255, 0.85), transparent);
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #0369A1;
+            padding: 0.4rem 0.8rem;
+            border-radius: 9999px;
+            border: 1px solid #bae6fd;
+            background: #ffffff;
+            transition: all 0.15s;
+        }
+        .back-btn:hover { background: #eff8ff; border-color: #0369A1; }
+
+        .page-btn {
+            min-width: 2rem;
+            height: 2rem;
+            padding: 0 0.5rem;
+            border-radius: 0.5rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border: 1px solid #dbeefe;
+            background: #ffffff;
+            color: #4b5563;
+            transition: all 0.15s;
+        }
+        .page-btn:hover { border-color: #0369A1; color: #0369A1; }
+        .page-btn.active { background: #0369A1; border-color: #0369A1; color: #ffffff; }
+        .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .random-btn {
+            position: fixed;
+            bottom: 1.5rem; right: 1.5rem;
+            z-index: 50;
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            padding: 0.75rem 1.25rem; border-radius: 9999px;
+            background: #0EA5E9; color: #ffffff;
+            font-size: 0.85rem; font-weight: 700;
+            border: none; cursor: pointer;
+            box-shadow: 0 8px 20px rgba(14, 165, 233, 0.35);
+            transition: all 0.15s;
+        }
+        .random-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 26px rgba(14, 165, 233, 0.45); background: #0284C7; }
+        .random-btn:active { transform: translateY(0); }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <div class="max-w-6xl mx-auto px-4 pt-4">
+        <a href="index.html" class="back-btn"><i class="fas fa-arrow-left text-xs"></i> 返回主页</a>
+    </div>
+
+    <main class="max-w-6xl mx-auto px-4 pb-12">
+
+        <!-- === 头部 === -->
+        <header class="text-center pt-4 pb-6">
+            <h1 class="text-3xl sm:text-4xl font-black text-gray-900 tracking-wide font-wenkai">四海日报 · 浪花集</h1>
+            <p class="font-serif-cn text-sm sm:text-base text-gray-500 mt-3">
+                往期日报的热议话题、有问必答与每日精选，每一朵浪花，都是一次真实的讨论。
+            </p>
+        </header>
+
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2.5 sm:gap-3 mt-4 mb-5" id="catGrid"></div>
+
+        <div class="flex items-center justify-between gap-3 mb-5 flex-wrap">
+            <div class="flex items-center gap-2">
+                <button id="btnSingle" class="view-btn active" onclick="setViewMode('single')">
+                    <i class="fas fa-id-card"></i> 单张卡片
+                </button>
+                <button id="btnGrid" class="view-btn" onclick="setViewMode('grid')">
+                    <i class="fas fa-border-all"></i> 网格图览
+                </button>
+            </div>
+        </div>
+
+        <div id="singleContainer" class="relative w-full max-w-3xl mx-auto mt-4"></div>
+
+        <div id="gridContainer" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6"></div>
+
+        <div id="pagination" class="hidden flex items-center justify-center gap-1.5 mt-8 flex-wrap"></div>
+    </main>
+
+    <button id="randomBtn" class="random-btn" title="随机跳到一张浪花卡">
+        随机漫步
+    </button>
+
+    <footer class="w-full py-6 border-t border-[#dbeefe] bg-white mt-4">
+        <div class="max-w-6xl mx-auto px-4 text-center">
+            <p class="text-gray-400 text-xs">四海翻腾云水怒，五洲震荡风雷激 · 四海日报浪花集 · <span id="footer-year"></span></p>
+        </div>
+    </footer>
+
+    <script src="assets/cases.js"></script>
+    <script>
+        (function () {
+            document.getElementById('footer-year').textContent = new Date().getFullYear();
+
+            const ALL = (window.CASES || []).slice().sort((a, b) => b.date.localeCompare(a.date));
+
+            const state = {
+                mode: 'single',
+                cat: '',
+                singleIndex: 0,
+                page: 1,
+                pageSize: 20,
+                filtered: []
+            };
+
+            const esc = (s) => String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+            function formatDetail(text) {
+                if (!text) return '';
+                const lines = String(text).split('\n');
+                let html = '';
+                lines.forEach(function (line) {
+                    const t = line.trim();
+                    if (!t) return;
+                    if (/^[一二三四五六七八九十]+、/.test(t) || /^[0-9]+\./.test(t)) {
+                        html += '<p class="text-sm sm:text-base font-black text-gray-800 mt-4 mb-1.5 tracking-wide font-sans">' + esc(t) + '</p>';
+                    } else {
+                        html += '<p class="mb-2.5 text-gray-700 text-[13px] sm:text-[15px] leading-relaxed">' + esc(t) + '</p>';
+                    }
+                });
+                return html;
+            }
+
+            function keywordsHtml(kws) {
+                if (!kws || !kws.length) return '';
+                return '<div class="flex flex-wrap gap-1.5 mb-4">' + kws.map(k => '<span class="inline-flex items-center px-2 py-0.5 rounded-md bg-sky-50 text-sky-700 font-medium text-[11px] border border-sky-100">#' + esc(k) + '</span>').join('') + '</div>';
+            }
+
+            function conclusionHtml(concl) {
+                if (!concl) return '';
+                const paras = String(concl).split('\n\n').map(p => '<p class="text-slate-700 text-[13px] sm:text-sm lg:text-[15px] font-medium leading-relaxed font-wenkai">' + esc(p.replace(/\n/g, ' ')) + '</p>').join('<div class="h-3"></div>');
+                return '<div class="conclusion-block px-3 sm:px-4 py-3 sm:py-3.5 mb-4">' +
+                    '<div class="flex items-center gap-2 mb-1.5"><i class="fas fa-check-circle text-brand text-xs sm:text-sm"></i><span class="text-xs sm:text-sm font-bold text-brand">关键结论</span></div>' +
+                    paras + '</div>';
+            }
+
+            function quotesHtml(quotes) {
+                if (!quotes || !quotes.length) return '';
+                return '<div class="space-y-2 mb-4">' + quotes.map(function (q) {
+                    return '<div class="quote-block px-3 sm:px-4 py-2.5 sm:py-3">' +
+                        '<p class="text-[13px] sm:text-[15px] text-amber-900 font-bold font-wenkai leading-relaxed pl-1">' + esc(q.text) + '</p>' +
+                        '<p class="text-[11px] text-amber-600 font-bold mt-1.5 text-right opacity-80">—— ' + esc(q.author || '群友') + '</p></div>';
+                }).join('') + '</div>';
+            }
+
+            function detailHtml(card, isSingle, uid) {
+                const maxH = isSingle ? 'max-h-[3000px]' : 'max-h-[150px]';
+                const mask = isSingle ? 'style="display:none"' : '';
+                const clickable = isSingle ? '' : 'cursor-pointer';
+                const onclick = isSingle ? '' : 'onclick="toggleDetail(\'' + uid + '\')"';
+                const btnText = isSingle ? '' : '展开完整阅读';
+                return '<div class="bg-[#f5faff] border border-[#dbeefe] rounded-lg p-3 sm:p-4 mb-4 relative">' +
+                    '<div class="flex items-center mb-2 border-b border-[#dbeefe] pb-2">' +
+                    '<i class="fas fa-align-left text-brand opacity-70 text-xs mr-2"></i><span class="text-[11px] font-bold text-gray-500 tracking-widest">详细内容</span></div>' +
+                    '<div class="relative ' + clickable + '" ' + onclick + '>' +
+                    '<div id="' + uid + '" class="detail-text ' + maxH + ' overflow-hidden font-wenkai text-[13px] sm:text-sm lg:text-[15px] leading-relaxed">' + formatDetail(card.detail) + '</div>' +
+                    '<div id="mask-' + uid + '" ' + mask + ' class="fade-mask absolute bottom-0 left-0 w-full h-16 pointer-events-none"></div></div>' +
+                    (isSingle ? '' : '<button id="btn-' + uid + '" class="mt-1 text-xs text-brand font-bold hover:opacity-80 flex items-center gap-1" onclick="toggleDetail(\'' + uid + '\')"><span>' + btnText + '</span> <i class="fas fa-chevron-down text-[10px]"></i></button>') +
+                    '</div>';
+            }
+
+            function cardHtml(card, isSingle, uid) {
+                const titleClass = isSingle ? 'text-lg sm:text-xl lg:text-2xl font-black text-gray-900 leading-snug mb-3 tracking-tight' : 'text-base sm:text-lg font-bold text-gray-800 leading-snug mb-3';
+                return '<div class="' + (isSingle ? 'bento-card immersive-card p-5 sm:p-8 lg:p-10 w-full' : 'bento-card grid-card p-4 sm:p-5 lg:p-6 h-full flex flex-col') + '">' +
+                    '<div class="flex items-center justify-between gap-2 mb-3">' +
+                    '<span class="text-[11px] sm:text-xs text-gray-400 font-medium font-mono bg-sky-50 px-2 py-0.5 rounded border border-sky-100">' + esc(card.date) + '</span>' +
+                    (card.climb ? '<span class="text-[10px] text-gray-400 italic truncate max-w-[60%]"><i class="fas fa-stairs mr-1"></i>' + esc(card.climb.slice(0, 40)) + '</span>' : '') +
+                    '</div>' +
+                    '<h3 class="' + titleClass + '" style="font-family:\'LXGW WenKai\',serif">' + esc(card.title) + '</h3>' +
+                    keywordsHtml(card.keywords) +
+                    detailHtml(card, isSingle, uid) +
+                    conclusionHtml(card.conclusion) +
+                    quotesHtml(card.quotes) +
+                    (isSingle ? '' : '<div class="flex-grow"></div>') +
+                    '<div class="flex justify-end pt-3 border-t border-[#dbeefe]">' +
+                    '<a href="' + esc(card.link) + '" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-sky-50 hover:bg-brand text-brand hover:text-white text-[11px] font-bold transition-all border border-sky-100 hover:border-transparent">阅读当日日报 <i class="fas fa-arrow-right text-[10px]"></i></a>' +
+                    '</div></div>';
+            }
+
+            window.toggleDetail = function (uid) {
+                const el = document.getElementById(uid);
+                const mask = document.getElementById('mask-' + uid);
+                const btn = document.getElementById('btn-' + uid);
+                if (!el) return;
+                const collapsed = el.classList.contains('max-h-[150px]');
+                if (collapsed) {
+                    el.classList.remove('max-h-[150px]');
+                    el.classList.add('max-h-[3000px]');
+                    if (mask) mask.style.display = 'none';
+                    if (btn) btn.innerHTML = '<span>收起</span> <i class="fas fa-chevron-up text-[10px]"></i>';
+                } else {
+                    el.classList.remove('max-h-[3000px]');
+                    el.classList.add('max-h-[150px]');
+                    if (mask) mask.style.display = '';
+                    if (btn) btn.innerHTML = '<span>展开完整阅读</span> <i class="fas fa-chevron-down text-[10px]"></i>';
+                }
+            };
+
+            function buildCategories() {
+                const order = window.CATEGORIES || [];
+                const counts = {};
+                ALL.forEach(c => { counts[c.category] = (counts[c.category] || 0) + 1; });
+                const cats = order.filter(c => counts[c]).map(c => ({ name: c, count: counts[c] }));
+                const grid = document.getElementById('catGrid');
+                grid.innerHTML = cats.map((c) => {
+                    const active = state.cat === c.name ? 'active' : '';
+                    return '<div class="bento-card cat-card p-3 sm:p-4 text-center ' + active + '" onclick="pickCat(\'' + esc(c.name) + '\')">' +
+                        '<div class="text-xs sm:text-sm font-bold text-gray-700 leading-tight truncate">' + esc(c.name) + '</div>' +
+                        '<div class="text-[10px] sm:text-xs text-gray-400 mt-1 font-mono">' + c.count + '</div></div>';
+                }).join('');
+            }
+
+            window.pickCat = function (name) {
+                // 再点一次已选中的分类 = 取消筛选，回到全部
+                state.cat = (state.cat === name) ? '' : name;
+                state.singleIndex = 0;
+                state.page = 1;
+                buildCategories();
+                applyFilter();
+                render();
+            };
+
+            function applyFilter() {
+                state.filtered = state.cat ? ALL.filter(c => c.category === state.cat) : ALL.slice();
+            }
+
+            window.setViewMode = function (mode) {
+                state.mode = mode;
+                document.getElementById('btnSingle').className = 'view-btn' + (mode === 'single' ? ' active' : '');
+                document.getElementById('btnGrid').className = 'view-btn' + (mode === 'grid' ? ' active' : '');
+                document.getElementById('singleContainer').classList.toggle('hidden', mode !== 'single');
+                document.getElementById('gridContainer').classList.toggle('hidden', mode !== 'grid');
+                document.getElementById('pagination').classList.toggle('hidden', mode !== 'grid');
+                render();
+            };
+
+            function render() {
+                if (state.mode === 'single') {
+                    const c = state.filtered[state.singleIndex];
+                    const sc = document.getElementById('singleContainer');
+                    if (!c) { sc.innerHTML = '<div class="text-center text-gray-400 py-16">暂无浪花</div>'; return; }
+                    sc.innerHTML =
+                        cardHtml(c, true, 'detail-' + state.singleIndex) +
+                        '<div class="flex items-center justify-between mt-4">' +
+                        '<button class="page-btn" onclick="stepSingle(-1)"' + (state.singleIndex === 0 ? ' disabled' : '') + '><i class="fas fa-chevron-left"></i></button>' +
+                        '<span class="text-xs text-gray-400 font-mono">' + (state.singleIndex + 1) + ' / ' + state.filtered.length + '</span>' +
+                        '<button class="page-btn" onclick="stepSingle(1)"' + (state.singleIndex >= state.filtered.length - 1 ? ' disabled' : '') + '><i class="fas fa-chevron-right"></i></button>' +
+                        '</div>';
+                    return;
+                }
+
+                const totalPages = Math.max(1, Math.ceil(state.filtered.length / state.pageSize));
+                if (state.page > totalPages) state.page = totalPages;
+                const start = (state.page - 1) * state.pageSize;
+                const pageItems = state.filtered.slice(start, start + state.pageSize);
+                document.getElementById('gridContainer').innerHTML = pageItems.map((c, i) => cardHtml(c, false, 'gdetail-' + start + '-' + i)).join('');
+
+                let pager = '<button class="page-btn" onclick="goPage(' + (state.page - 1) + ')"' + (state.page === 1 ? ' disabled' : '') + '>上一页</button>';
+                for (let p = 1; p <= totalPages; p++) {
+                    pager += '<button class="page-btn ' + (p === state.page ? 'active' : '') + '" onclick="goPage(' + p + ')">' + p + '</button>';
+                }
+                pager += '<button class="page-btn" onclick="goPage(' + (state.page + 1) + ')"' + (state.page === totalPages ? ' disabled' : '') + '>下一页</button>';
+                document.getElementById('pagination').innerHTML = pager;
+            }
+
+            window.stepSingle = function (d) {
+                const n = state.singleIndex + d;
+                if (n < 0 || n >= state.filtered.length) return;
+                state.singleIndex = n;
+                render();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            };
+
+            // ---- 随机漫步：在当前筛选结果里随机跳一张（不与当前重复） ----
+            document.getElementById('randomBtn').addEventListener('click', function () {
+                const n = state.filtered.length;
+                if (!n) return;
+                let idx = state.singleIndex;
+                if (n > 1) { while (idx === state.singleIndex) { idx = Math.floor(Math.random() * n); } }
+                state.singleIndex = idx;
+                setViewMode('single');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+            window.goPage = function (p) {
+                const total = Math.max(1, Math.ceil(state.filtered.length / state.pageSize));
+                if (p < 1 || p > total) return;
+                state.page = p;
+                render();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            };
+
+            applyFilter();
+            buildCategories();
+            render();
+        })();
+    </script>
+</body>
+</html>
