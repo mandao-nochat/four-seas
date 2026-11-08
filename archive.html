@@ -1,41 +1,195 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>历史日报 - 四海日报</title>
-    <meta name="description" content="四海日报·历史日报：搜话题、搜关键词、搜日期，找回往期每一篇。">
+    <title>四海历史日报汇总</title>
+    <meta name="description" content="按日期或关键词查询四海历史日报">
     <link rel="icon" type="image/png" href="favicon.png">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
         @import url('https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/style.css');
 
-        body { background-color: #f5faff; color: #1f2937; }
-        .text-brand { color: #0369A1; }
-        .bg-brand { background-color: #0EA5E9; }
+        * {
+            font-family: 'Inter', ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+        }
+
         .font-wenkai { font-family: 'LXGW WenKai', 'Noto Serif SC', 'Songti SC', 'SimSun', serif; }
 
-        .bento-card {
-            background: #ffffff;
-            border: 1px solid #dbeefe;
-            border-radius: 1rem;
-            box-shadow: 0 1px 3px rgba(14, 165, 233, 0.05);
+        body {
+            background-color: #f5faff;
+            color: #1f2937;
         }
 
-        .search-box {
-            width: 100%;
-            padding: 0.9rem 1.2rem 0.9rem 3rem;
-            border-radius: 0.9rem;
-            border: 1px solid #bae6fd;
-            background: #ffffff;
-            font-size: 0.95rem;
-            color: #1f2937;
-            outline: none;
-            transition: all 0.15s;
+        .bento-card {
+            background-color: #ffffff;
+            border: 1px solid #dbeefe;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(14, 165, 233, 0.06), 0 2px 4px -2px rgba(14, 165, 233, 0.04);
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
-        .search-box:focus { border-color: #0EA5E9; box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.12); }
+
+        .bento-card:hover {
+            box-shadow: 0 10px 15px -3px rgba(14, 165, 233, 0.08), 0 4px 6px -4px rgba(14, 165, 233, 0.05);
+            transform: translateY(-3px);
+        }
+
+        .section-title {
+            color: #1f2937;
+            font-size: 2.25rem;
+            font-weight: 800;
+            margin-bottom: 2rem;
+        }
+
+        .report-container {
+            background-color: #ffffff;
+            border: 1px solid #dbeefe;
+            border-radius: 0.75rem;
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 1rem;
+            padding: 1rem 7.5rem 1rem 1rem;
+            position: relative;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        .report-container:hover {
+            border-color: #0EA5E9;
+            box-shadow: 0 8px 12px -2px rgba(14, 165, 233, 0.10), 0 3px 6px -3px rgba(14, 165, 233, 0.06);
+            transform: translateY(-2px);
+        }
+
+        .report-title-link {
+            color: #0EA5E9;
+            display: block;
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .report-title-link:hover {
+            color: #0369A1;
+            text-decoration: underline;
+        }
+
+        .report-date-info {
+            align-items: center;
+            color: #6b7280;
+            display: flex;
+            font-size: 0.875rem;
+            font-weight: 400;
+        }
+
+        .report-date-info i {
+            color: #0EA5E9;
+            margin-right: 0.5rem;
+        }
+
+        .view-details-btn {
+            align-items: center;
+            background-color: #eff8ff;
+            border: 1px solid #bae6fd;
+            border-radius: 0.5rem;
+            color: #0369A1;
+            display: inline-flex;
+            font-size: 0.875rem;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            position: absolute;
+            right: 1.5rem;
+            text-decoration: none;
+            top: 50%;
+            transform: translateY(-50%);
+            transition: all 0.2s ease;
+        }
+
+        .view-details-btn:hover {
+            background-color: #dbeefe;
+            border-color: #7dd3fc;
+            color: #075985;
+        }
+
+        .view-details-btn i {
+            color: #0369A1;
+            margin-right: 0.5rem;
+        }
+
+        .report-container.search-result-card {
+            padding-right: 1rem;
+        }
+
+        .search-result-card .view-details-btn {
+            align-self: flex-start;
+            margin-top: 1rem;
+            position: static;
+            transform: none;
+        }
+
+        .search-result-snippet {
+            color: #4b5563;
+            font-size: 0.95rem;
+            line-height: 1.75;
+        }
+
+        .search-highlight {
+            background-color: #FDF3D8;
+            border-radius: 0.25rem;
+            color: #0369A1;
+            font-weight: 700;
+            padding: 0 0.15rem;
+        }
+
+        .search-status {
+            min-height: 1.25rem;
+        }
+
+        .loading-spinner {
+            animation: spin 1s linear infinite;
+            border: 3px solid #f3f3f3;
+            border-radius: 50%;
+            border-top-color: #0EA5E9;
+            display: inline-block;
+            height: 20px;
+            width: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+        }
+
+        select:focus {
+            border-color: #0EA5E9;
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+            outline: none;
+        }
+
+        .text-theme-sky {
+            color: #0EA5E9;
+        }
+
+        .bg-theme-sky {
+            background-color: #0EA5E9;
+        }
+
+        .bg-theme-sky:hover {
+            background-color: #0369A1;
+        }
 
         .back-btn {
             display: inline-flex; align-items: center; gap: 0.35rem;
@@ -46,68 +200,149 @@
         }
         .back-btn:hover { background: #eff8ff; border-color: #0369A1; }
 
-        .day-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
-        .read-btn {
-            display: inline-flex; align-items: center; gap: 0.4rem;
-            padding: 0.45rem 1rem; border-radius: 0.6rem;
-            background: #eff8ff; color: #0369A1;
-            font-size: 0.78rem; font-weight: 700;
-            border: 1px solid #bae6fd;
-            transition: all 0.15s;
-        }
-        .read-btn:hover { background: #0EA5E9; color: #ffffff; border-color: transparent; }
+        @media (max-width: 640px) {
+            .section-title {
+                font-size: 1.5rem;
+                margin-bottom: 1.5rem;
+            }
 
-        .topic-row {
-            display: flex; align-items: baseline; justify-content: space-between; gap: 0.75rem;
-            padding: 0.55rem 0.2rem;
-            border-bottom: 1px dashed #dbeefe;
-            cursor: pointer;
-            transition: all 0.12s;
+            .report-container {
+                padding-right: 1rem;
+            }
+
+            .report-container:not(.search-result-card) .view-details-btn {
+                align-self: flex-start;
+                margin-top: 1rem;
+                position: static;
+                transform: none;
+            }
+
+            .bento-card.p-8 {
+                padding: 1.25rem !important;
+            }
+
+            h1.text-5xl {
+                font-size: 2rem !important;
+                margin-bottom: 1.25rem !important;
+            }
         }
-        .topic-row:last-child { border-bottom: none; }
-        .topic-row:hover { background: #f5faff; border-radius: 0.5rem; }
-        .cat-chip {
-            flex-shrink: 0;
-            display: inline-flex; align-items: center;
-            padding: 0.1rem 0.55rem; border-radius: 9999px;
-            background: #eff8ff; color: #0369A1;
-            font-size: 0.68rem; font-weight: 700;
-            border: 1px solid #dbeefe;
-        }
-        mark { background: #FDF3D8; color: inherit; padding: 0 1px; border-radius: 2px; }
     </style>
 </head>
+
 <body class="min-h-screen">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div class="mb-4">
+            <a href="index.html" class="back-btn"><i class="fas fa-arrow-left text-xs"></i> 返回主页</a>
+        </div>
 
-    <div class="max-w-4xl mx-auto px-4 pt-4">
-        <a href="index.html" class="back-btn"><i class="fas fa-arrow-left text-xs"></i> 返回主页</a>
-    </div>
-
-    <main class="max-w-4xl mx-auto px-4 pb-12">
-
-        <header class="text-center pt-4 pb-5">
-            <h1 class="text-3xl sm:text-4xl font-black text-gray-900 tracking-wide font-wenkai">四海日报 · 历史日报</h1>
-            <p class="font-serif-cn text-sm sm:text-base text-gray-500 mt-3">
-                往期每一篇都在这里——搜话题、搜关键词、搜日期。
-            </p>
+        <header class="w-full mb-8">
+            <div class="bento-card p-8">
+                <div class="text-center">
+                    <h1 class="text-5xl font-black text-gray-900 mb-6 font-wenkai">四海历史日报汇总</h1>
+                    <div class="flex flex-col sm:flex-row justify-center items-center space-y-2 sm:space-y-0 sm:space-x-6 text-lg">
+                        <div class="flex items-center text-gray-700">
+                            <i class="fas fa-history mr-2 text-theme-sky"></i>
+                            <span>历史日报检索</span>
+                        </div>
+                        <div class="flex items-center text-gray-700">
+                            <i class="fas fa-calendar-alt mr-2 text-theme-sky"></i>
+                            <span>2026年11月6日起</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </header>
 
-        <!-- 搜索框 -->
-        <div class="relative mb-3">
-            <i class="fas fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-sky-400"></i>
-            <input id="searchInput" type="text" class="search-box" placeholder="搜话题、关键词、分类、日期（如：社保 / 长征 / 11-07）……" autocomplete="off">
-        </div>
-        <div class="flex items-center justify-between mb-6">
-            <span id="statLine" class="text-xs text-gray-400"></span>
-            <button id="clearBtn" class="text-xs text-gray-400 hover:text-brand hidden"><i class="fas fa-xmark"></i> 清空</button>
-        </div>
+        <section class="daily-search-card w-full mb-8">
+            <div class="bento-card p-6">
+                <label for="reportSearchInput" class="block text-sm font-semibold text-gray-800 mb-2">
+                    <i class="fas fa-search mr-2 text-theme-sky"></i>
+                    搜索日报内容
+                </label>
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <input id="reportSearchInput" type="search"
+                        class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-colors"
+                        placeholder="输入关键词，例如：社保">
+                    <button id="reportSearchButton" type="button"
+                        class="px-5 py-3 rounded-lg bg-theme-sky text-white font-semibold transition-colors">
+                        <i class="fas fa-search mr-2"></i>
+                        搜索
+                    </button>
+                </div>
+                <div id="reportSearchStatus" class="search-status text-sm text-gray-500 mt-3"></div>
+            </div>
+        </section>
 
-        <!-- 日期分组列表 -->
-        <div id="dayList" class="space-y-8"></div>
-    </main>
+        <section class="date-selector-card w-full mb-8">
+            <div class="bento-card p-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label for="yearSelector" class="block text-sm font-semibold text-gray-800 mb-2">
+                            <i class="fas fa-calendar mr-2 text-theme-sky"></i>
+                            选择年份
+                        </label>
+                        <select id="yearSelector"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-colors">
+                        </select>
+                    </div>
+                    <div>
+                        <label for="monthSelector" class="block text-sm font-semibold text-gray-800 mb-2">
+                            <i class="fas fa-calendar-days mr-2 text-theme-sky"></i>
+                            选择月份
+                        </label>
+                        <select id="monthSelector"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-colors">
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="report-list-card w-full mb-12">
+            <div class="bento-card p-6">
+                <div id="reports-header" class="mb-6" hidden>
+                    <h2 class="section-title"><span id="selected-period">所选时期</span> 的日报</h2>
+                    <div class="flex items-center text-gray-600 mb-4">
+                        <i class="fas fa-file-alt mr-2 text-theme-sky"></i>
+                        <span>共找到 <span id="reports-count" class="font-semibold text-theme-sky">0</span> 份日报</span>
+                    </div>
+                </div>
+
+                <div id="reportLinksContainer" class="min-h-[200px]" aria-live="polite">
+                    <div class="text-center text-gray-500 py-8">
+                        <div class="loading-spinner mx-auto mb-3"></div>
+                        <p>正在加载日报...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="w-full mb-12">
+            <div class="bento-card p-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-info-circle mr-2 text-theme-sky"></i>
+                    使用说明
+                </h3>
+                <div class="space-y-3 text-sm text-gray-700">
+                    <div class="flex items-start">
+                        <i class="fas fa-search mr-2 text-theme-sky mt-0.5"></i>
+                        <span>可使用关键词搜索已收录的四海日报全文</span>
+                    </div>
+                    <div class="flex items-start">
+                        <i class="fas fa-filter mr-2 text-theme-sky mt-0.5"></i>
+                        <span>使用年份和月份选择器查看特定时期的日报</span>
+                    </div>
+                    <div class="flex items-start">
+                        <i class="fas fa-link mr-2 text-theme-sky mt-0.5"></i>
+                        <span>点击日报标题即可打开对应的详细页面</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
 
     <footer class="w-full py-6 border-t border-[#dbeefe] bg-white mt-4">
-        <div class="max-w-4xl mx-auto px-4 text-center">
+        <div class="max-w-3xl mx-auto px-4 text-center">
             <p class="text-gray-400 text-xs">四海翻腾云水怒，五洲震荡风雷激 · 四海日报 · <span id="footer-year"></span></p>
         </div>
     </footer>
@@ -115,75 +350,288 @@
     <script src="assets/cases.js"></script>
     <script src="assets/public_quotes.js"></script>
     <script>
-        (function () {
+        const START_DATE = '2026-11-06';
+        const REPORT_FILENAME_PREFIX = 'fourseas_daily_';
+        const REPORT_FILENAME_SUFFIX = '.html';
+
+        // 目录由 cases.js + REPORT_DATES 自动生成，新日报推送后无需改本页
+        const REPORT_DATES = window.REPORT_DATES || [];
+        const ALL_CASES = window.CASES || [];
+        const REPORT_CATALOG = REPORT_DATES.map(function (date) {
+            const dayCases = ALL_CASES.filter(function (c) { return c.date === date; });
+            const searchText = dayCases.map(function (c) {
+                return [c.title, (c.keywords || []).join(' '), c.climb || '', c.category || ''].join(' ');
+            }).join(' ');
+            return { date: date, title: '四海日报 ' + date, searchText: searchText };
+        });
+
+        let yearSelector;
+        let monthSelector;
+        let reportLinksContainer;
+        let reportSearchInput;
+        let reportSearchStatus;
+        let searchDebounceTimer;
+        const reportContentCache = new Map();
+
+        document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('footer-year').textContent = new Date().getFullYear();
+            yearSelector = document.getElementById('yearSelector');
+            monthSelector = document.getElementById('monthSelector');
+            reportLinksContainer = document.getElementById('reportLinksContainer');
+            reportSearchInput = document.getElementById('reportSearchInput');
+            reportSearchStatus = document.getElementById('reportSearchStatus');
 
-            const CASES = window.CASES || [];
-            const input = document.getElementById('searchInput');
-            const statLine = document.getElementById('statLine');
-            const clearBtn = document.getElementById('clearBtn');
-            const dayList = document.getElementById('dayList');
+            populateYearSelector();
+            yearSelector.addEventListener('change', handleYearChange);
+            monthSelector.addEventListener('change', loadSelectedMonth);
+            document.getElementById('reportSearchButton').addEventListener('click', handleReportSearch);
+            reportSearchInput.addEventListener('input', function () {
+                clearTimeout(searchDebounceTimer);
+                searchDebounceTimer = setTimeout(handleReportSearch, 250);
+            });
+        });
 
-            const esc = (s) => String(s || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-            // 命中词高亮（先转义再标）
-            const hl = (s, q) => {
-                const e = esc(s);
-                if (!q) return e;
-                try { return e.replace(new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi'), '<mark>$1</mark>'); }
-                catch (err) { return e; }
-            };
+        function getToday() {
+            const now = new Date();
+            return { year: now.getFullYear(), month: now.getMonth() + 1, day: now.getDate() };
+        }
 
-            // 全部日期 = REPORT_DATES ∪ 案例日期，倒序
-            const dates = [...new Set([...(window.REPORT_DATES || []), ...CASES.map(c => c.date)])].sort().reverse();
+        function parseDate(dateString) {
+            const parts = dateString.split('-').map(Number);
+            return new Date(parts[0], parts[1] - 1, parts[2]);
+        }
 
-            function render() {
-                const q = input.value.trim().toLowerCase();
-                clearBtn.classList.toggle('hidden', !q);
-                const match = (c) => !q || (c.title + ' ' + (c.keywords || []).join(' ') + ' ' + (c.climb || '') + ' ' + (c.category || '') + ' ' + c.date).toLowerCase().includes(q);
+        function dateString(year, month, day) {
+            return year + '-' + String(month).padStart(2, '0') + '-' + String(day).padStart(2, '0');
+        }
 
-                let dayCount = 0, topicCount = 0;
-                const html = [];
+        function getWeekdayName(year, month, day) {
+            return ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'][new Date(year, month - 1, day).getDay()];
+        }
 
-                for (const date of dates) {
-                    const dayCases = CASES.filter(c => c.date === date && match(c));
-                    // 空查询：显示全部；有查询：该日无命中则整日隐藏（日期本身命中则显示全日）
-                    if (q && !dayCases.length && !date.includes(q)) continue;
-                    dayCount++;
-                    topicCount += dayCases.length;
+        function calculateIssueNumber(date) {
+            const diff = parseDate(date) - parseDate(START_DATE);
+            return Math.floor(diff / 86400000) + 1;
+        }
 
-                    html.push('<section class="bento-card p-5 sm:p-6">');
-                    html.push('<div class="day-head mb-3">');
-                    html.push('<div><span class="text-lg font-black text-gray-900 font-mono">' + esc(date) + '</span>');
-                    html.push('<span class="text-xs text-gray-400 ml-2">' + (q ? '命中 ' + dayCases.length + ' 个话题' : dayCases.length + ' 个话题') + '</span></div>');
-                    html.push('<a class="read-btn" href="fourseas_daily_' + esc(date) + '.html" target="_blank" rel="noopener"><i class="fas fa-book-open text-[10px]"></i> 阅读这期日报</a>');
-                    html.push('</div>');
+        function populateYearSelector() {
+            const startYear = parseDate(START_DATE).getFullYear();
+            const currentYear = Math.max(startYear, getToday().year);
+            yearSelector.innerHTML = '';
 
-                    if (!dayCases.length) {
-                        html.push('<p class="text-sm text-gray-400 py-2">本日话题卡待补，可直接阅读日报原文。</p>');
-                    } else {
-                        html.push('<div>');
-                        for (const c of dayCases) {
-                            html.push('<div class="topic-row" onclick="location.href=\'fourseas_daily_' + esc(date) + '.html\'">');
-                            html.push('<span class="text-[15px] font-bold text-gray-800 font-wenkai leading-snug">' + hl(c.title, input.value.trim()) + '</span>');
-                            html.push('<span class="cat-chip">' + esc(c.category || '群聊') + '</span>');
-                            html.push('</div>');
-                        }
-                        html.push('</div>');
-                    }
-                    html.push('</section>');
-                }
-
-                if (!dayCount) {
-                    html.push('<div class="text-center text-gray-400 py-16"><i class="fas fa-magnifying-glass text-2xl mb-3 block"></i>没搜到相关内容，换个词试试</div>');
-                }
-                dayList.innerHTML = html.join('');
-                statLine.textContent = dayCount + ' 天 · ' + topicCount + ' 个话题';
+            for (let year = startYear; year <= currentYear; year++) {
+                yearSelector.add(new Option(year + '年', String(year)));
             }
 
-            input.addEventListener('input', render);
-            clearBtn.addEventListener('click', function () { input.value = ''; render(); input.focus(); });
-            render();
-        })();
+            yearSelector.value = String(currentYear);
+            populateMonthSelector(currentYear);
+        }
+
+        function populateMonthSelector(year) {
+            const start = parseDate(START_DATE);
+            const today = getToday();
+            const startMonth = year === start.getFullYear() ? start.getMonth() + 1 : 1;
+            const endMonth = year === today.year ? today.month : 12;
+
+            monthSelector.innerHTML = '';
+            for (let month = startMonth; month <= endMonth; month++) {
+                monthSelector.add(new Option(month + '月', String(month)));
+            }
+
+            monthSelector.value = String(endMonth);
+            loadSelectedMonth();
+        }
+
+        function handleYearChange() {
+            populateMonthSelector(Number(yearSelector.value));
+        }
+
+        function loadSelectedMonth() {
+            setDateSelectorVisible(true);
+            reportSearchInput.value = '';
+            reportSearchStatus.textContent = '';
+            fetchAndDisplayReports(Number(yearSelector.value), Number(monthSelector.value));
+        }
+
+        function getReportUrl(date) {
+            return REPORT_FILENAME_PREFIX + date + REPORT_FILENAME_SUFFIX;
+        }
+
+        function reportExists(date) {
+            return REPORT_DATES.indexOf(date) !== -1;
+        }
+
+        function fetchAndDisplayReports(year, month) {
+            showLoading('正在检查日报文件...');
+            hideReportsHeader();
+
+            const today = getToday();
+            const start = parseDate(START_DATE);
+            const daysInMonth = new Date(year, month, 0).getDate();
+            const firstDay = year === start.getFullYear() && month === start.getMonth() + 1 ? start.getDate() : 1;
+            const lastDay = year === today.year && month === today.month ? today.day : daysInMonth;
+
+            if (firstDay > lastDay) {
+                renderEmptyState('该月份日报尚未开始更新');
+                return;
+            }
+
+            const candidates = [];
+            for (let day = firstDay; day <= lastDay; day++) {
+                const date = dateString(year, month, day);
+                candidates.push({
+                    date: date,
+                    day: day,
+                    url: getReportUrl(date),
+                    weekday: getWeekdayName(year, month, day),
+                    issueNumber: calculateIssueNumber(date)
+                });
+            }
+
+            const reports = candidates.filter(function (report) { return reportExists(report.date); }).reverse();
+
+            if (reports.length === 0) {
+                renderEmptyState('该月份暂无日报');
+                return;
+            }
+
+            showReportsHeader(year + '年' + month + '月', reports.length);
+            reportLinksContainer.innerHTML = reports.map(function (report) {
+                return '<div class="report-container">' +
+                    '<a href="' + escapeAttribute(report.url) + '" class="report-title-link" target="_blank" rel="noopener">' +
+                    '四海 ' + year + '.' + month + '.' + report.day + '</a>' +
+                    '<div class="report-date-info"><i class="fas fa-calendar-day"></i>' +
+                    '<span>' + report.weekday + ' 第' + report.issueNumber + '期</span></div>' +
+                    '<a href="' + escapeAttribute(report.url) + '" class="view-details-btn" target="_blank" rel="noopener">' +
+                    '<i class="fas fa-external-link-alt"></i><span>查看详情</span></a></div>';
+            }).join('');
+        }
+
+        async function handleReportSearch() {
+            const keyword = reportSearchInput.value.trim();
+            if (!keyword) {
+                loadSelectedMonth();
+                return;
+            }
+
+            setDateSelectorVisible(false);
+            showLoading('正在搜索历史日报...');
+            hideReportsHeader();
+            reportSearchStatus.textContent = '正在读取日报内容...';
+
+            const normalizedKeyword = keyword.toLowerCase();
+            const searchableReports = await Promise.all(REPORT_CATALOG.map(async function (report) {
+                const full = await loadReportSearchText(report);
+                return { date: report.date, title: report.title, fullSearchText: full };
+            }));
+            const results = searchableReports
+                .filter(function (report) { return report.fullSearchText.toLowerCase().includes(normalizedKeyword); })
+                .sort(function (a, b) { return b.date.localeCompare(a.date); });
+
+            reportSearchStatus.textContent = '已检索 ' + REPORT_CATALOG.length + ' 篇日报';
+            showReportsHeader('包含“' + keyword + '”', results.length);
+
+            if (results.length === 0) {
+                renderEmptyState('没有找到包含“' + keyword + '”的日报', false);
+                return;
+            }
+
+            reportLinksContainer.innerHTML = results.map(function (report) {
+                return '<div class="report-container search-result-card">' +
+                    '<a href="' + escapeAttribute(getReportUrl(report.date)) + '" class="report-title-link" target="_blank" rel="noopener">' +
+                    escapeHtml(report.title) + '</a>' +
+                    '<div class="report-date-info"><i class="fas fa-calendar-day"></i>' +
+                    '<span>' + escapeHtml(formatDate(report.date)) + ' · 搜索结果</span></div>' +
+                    '<p class="search-result-snippet">' + buildSnippet(report.fullSearchText, keyword) + '</p>' +
+                    '<a href="' + escapeAttribute(getReportUrl(report.date)) + '" class="view-details-btn" target="_blank" rel="noopener">' +
+                    '<i class="fas fa-external-link-alt"></i><span>查看详情</span></a></div>';
+            }).join('');
+        }
+
+        async function loadReportSearchText(report) {
+            if (reportContentCache.has(report.date)) {
+                return reportContentCache.get(report.date);
+            }
+
+            let text = report.title + ' ' + report.date + ' ' + report.searchText;
+            try {
+                const response = await fetch(getReportUrl(report.date), { cache: 'force-cache' });
+                if (response.ok) {
+                    const html = await response.text();
+                    const documentCopy = new DOMParser().parseFromString(html, 'text/html');
+                    documentCopy.querySelectorAll('script, style, noscript').forEach(function (element) { element.remove(); });
+                    text += ' ' + (documentCopy.body.textContent || '');
+                }
+            } catch (error) {
+                // 本地 file:// 预览可能无法 fetch 相邻文件，此时仍可搜索目录摘要。
+            }
+
+            const normalizedText = text.replace(/\s+/g, ' ').trim();
+            reportContentCache.set(report.date, normalizedText);
+            return normalizedText;
+        }
+
+        function buildSnippet(text, keyword) {
+            const matchIndex = text.toLowerCase().indexOf(keyword.toLowerCase());
+            if (matchIndex < 0) {
+                return escapeHtml(text);
+            }
+
+            const start = Math.max(0, matchIndex - 45);
+            const end = Math.min(text.length, matchIndex + keyword.length + 65);
+            return (start > 0 ? '...' : '') + escapeHtml(text.slice(start, matchIndex)) +
+                '<mark class="search-highlight">' + escapeHtml(text.slice(matchIndex, matchIndex + keyword.length)) + '</mark>' +
+                escapeHtml(text.slice(matchIndex + keyword.length, end)) + (end < text.length ? '...' : '');
+        }
+
+        function showReportsHeader(period, count) {
+            document.getElementById('selected-period').textContent = period;
+            document.getElementById('reports-count').textContent = String(count);
+            document.getElementById('reports-header').hidden = false;
+        }
+
+        function hideReportsHeader() {
+            document.getElementById('reports-header').hidden = true;
+        }
+
+        function showLoading(message) {
+            reportLinksContainer.innerHTML =
+                '<div class="text-center text-gray-500 py-8"><div class="loading-spinner mx-auto mb-3"></div>' +
+                '<p>' + escapeHtml(message) + '</p></div>';
+        }
+
+        function renderEmptyState(message, hideHeader) {
+            if (hideHeader !== false) {
+                hideReportsHeader();
+            }
+            reportLinksContainer.innerHTML =
+                '<div class="text-center text-gray-500 py-8"><i class="fas fa-calendar-times text-2xl mb-2"></i>' +
+                '<p>' + escapeHtml(message) + '</p>' +
+                '<p class="text-sm mt-1">可以选择其他月份或换一个关键词</p></div>';
+        }
+
+        function setDateSelectorVisible(visible) {
+            document.querySelector('.date-selector-card').style.display = visible ? '' : 'none';
+        }
+
+        function formatDate(date) {
+            const parts = date.split('-').map(Number);
+            return parts[0] + '年' + parts[1] + '月' + parts[2] + '日';
+        }
+
+        function escapeHtml(value) {
+            return String(value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function escapeAttribute(value) {
+            return escapeHtml(value || '#');
+        }
     </script>
 </body>
+
 </html>
