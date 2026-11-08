@@ -1,61 +1,992 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>四海日报</title>
+    <title>四海-我们都是来自五湖四海</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <meta name="description" content="四海日报：爱国爱党同志闲聊群的每日精华——来自五湖四海，走到一起，便成了海。">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Three.js（星空卡片，defer 异步加载） -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.157.0/build/three.min.js" defer></script>
     <style>
-        * { box-sizing: border-box; }
+        /* 字体：Inter(西文) / Noto Sans SC(正文) / LXGW WenKai(装饰)，均免费商用 */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap');
+        @import url('https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/style.css');
+
+        * { font-family: 'Inter', 'Noto Sans SC', system-ui, sans-serif; }
+
+        .font-serif-cn {
+            font-family: 'LXGW WenKai', 'Noto Serif SC', 'Songti SC', 'SimSun', serif;
+            letter-spacing: 0.02em;
+        }
+
         body {
-            margin: 0;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(160deg, #ffffff 0%, #f8faff 40%, #f0f4ff 100%);
-            font-family: 'Inter', ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
-            color: #000000;
+            background-color: #f5faff;
+            color: #1f2937;
         }
-        .card {
-            max-width: 480px;
-            width: calc(100% - 3rem);
+
+        html { scroll-behavior: smooth; }
+
+        .text-brand { color: #0369A1; }
+        .bg-brand { background-color: #0EA5E9; }
+
+        /* ================= 卡片 ================= */
+        .bento-card {
             background: #ffffff;
-            border: 1px solid #e9e9eb;
+            border: 1px solid #dbeefe;
             border-radius: 1rem;
-            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.07), 0 4px 6px -4px rgba(0,0,0,0.05);
-            padding: 3rem 2.5rem;
-            text-align: center;
+            box-shadow: 0 1px 3px rgba(14, 165, 233, 0.05);
         }
-        .logo {
-            width: 56px;
-            height: 56px;
-            margin: 0 auto 1.25rem;
-            border-radius: 12px;
-            background: linear-gradient(135deg, #4D6BFE 0%, #6B8BFF 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #ffffff;
+
+        .section-title {
             font-size: 1.5rem;
             font-weight: 900;
+            color: #1f2937;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
         }
-        h1 { font-size: 2rem; font-weight: 800; margin: 0 0 0.5rem; }
-        .sub { color: #6b7280; font-size: 0.95rem; margin: 0 0 2rem; }
-        .hint {
-            color: #9ca3af;
+        .section-title::before {
+            content: '';
+            width: 0.375rem;
+            height: 2rem;
+            background: #0EA5E9;
+            border-radius: 9999px;
+            flex-shrink: 0;
+        }
+
+        /* ================= 星空宣言卡 ================= */
+        .hero-gradient {
+            background: linear-gradient(135deg, #eff8ff 0%, #ffffff 100%);
+        }
+
+        /* 文字可读性蒙版：左浓右透，星星在右侧清晰 */
+        .hero-mask {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 5;
+            background: linear-gradient(to right,
+                rgba(255, 255, 255, 0.92) 0%,
+                rgba(255, 255, 255, 0.86) 30%,
+                rgba(255, 255, 255, 0.55) 48%,
+                rgba(255, 255, 255, 0.15) 62%,
+                transparent 78%);
+        }
+
+        /* 装饰性大字（漫道何意卡片右上角） */
+        .quote-icon {
+            position: absolute;
+            color: rgba(3, 105, 161, 0.08);
+            font-size: 8rem;
+            line-height: 1;
+            z-index: 0;
+            font-family: 'LXGW WenKai', serif;
+            pointer-events: none;
+        }
+
+        /* ================= 日历（紧凑版，参照新茧） ================= */
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.35rem;
+        }
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.5rem;
+            font-weight: 500;
             font-size: 0.85rem;
-            border-top: 1px dashed #e5e7eb;
-            padding-top: 1.25rem;
-            line-height: 1.7;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #4b5563;
+            background-color: #f9fafb;
+        }
+        .calendar-day:hover:not(.empty):not(.disabled) {
+            background-color: #0EA5E9;
+            color: white;
+            box-shadow: 0 4px 10px rgba(14, 165, 233, 0.25);
+        }
+        .calendar-day.today {
+            border: 2px solid #0EA5E9;
+            color: #0369A1;
+            font-weight: 700;
+            background-color: #eff8ff;
+        }
+        .calendar-day.disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            background-color: transparent;
+        }
+        .calendar-day.empty {
+            background-color: transparent;
+            cursor: default;
+        }
+        .calendar-day.has-report {
+            background-color: #0EA5E9;
+            color: white;
+            font-weight: 700;
+        }
+        .calendar-day.has-report:hover {
+            background-color: #0369A1;
+        }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* ================= 移动端适配（仅小屏生效，不影响桌面端） ================= */
+        @media (max-width: 640px) {
+            /* 顶部导航：logo 一行、锚点一行，缩小字号与间距 */
+            #page-toc > div {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 6px;
+            }
+            #page-toc .no-scrollbar {
+                width: 100%;
+                flex-wrap: wrap;
+                overflow-x: visible;
+                gap: 2px;
+            }
+            #page-toc .no-scrollbar a {
+                font-size: 12px;
+                padding: 5px 9px;
+            }
+
+            /* 主容器：收窄板块之间的上下留白 */
+            #top {
+                padding-top: 0.75rem;
+                padding-bottom: 0.75rem;
+            }
+            #top > * + * { margin-top: 2.25rem; }
+
+            /* 漫道何意 / 加入我们 / 群里聊什么：紧凑 */
+            #meaning .grid { gap: 0.75rem; }
+            #meaning .bento-card { padding: 1.15rem 1.15rem 1.4rem; }
+            #meaning .bento-card h3 { margin-bottom: 0.65rem; font-size: 1.05rem; }
+            #meaning .bento-card p { font-size: 13px; line-height: 1.85; }
+
+            #join-us section > div { padding: 1.15rem; }
+            #join-us .max-w-2xl > p { margin-bottom: 1rem; font-size: 15px; }
+
+            #topics .grid { gap: 0.75rem; }
+            #topics .bento-card { padding: 1rem; }
+            #topics .bento-card > span { margin-bottom: 0.65rem; }
+            #topics .bento-card h3 { margin-bottom: 0.4rem; }
+            #topics .bento-card p { font-size: 13px; }
+
+            /* 各 section 标题与内容间距收紧 */
+            #meaning > h2, #join-us > h2, #topics > h2 { margin-bottom: 0.25rem; }
+            #topics > p { font-size: 13px; }
         }
     </style>
 </head>
-<body>
-    <main class="card">
-        <div class="logo">四</div>
-        <h1>四海日报</h1>
-        <p class="sub">每日群聊精华，陆续更新中</p>
-        <p class="hint">日报生成后将在此发布<br>首页占位 · 待接入日报列表</p>
+
+<body class="antialiased">
+
+    <!-- 页面右上角晨光：固定于视口右上，随滚动常驻，光幕往下撒 -->
+    <div class="fixed top-0 right-0 w-[38rem] h-[30rem] pointer-events-none z-[55]" style="background: radial-gradient(closest-side, rgba(253, 233, 180, 0.5), rgba(253, 243, 216, 0.2) 55%, rgba(253, 243, 216, 0));"></div>
+    <div class="fixed top-0 right-0 w-full h-[70vh] pointer-events-none z-[55]" style="background: linear-gradient(172deg, rgba(253, 233, 180, 0.16) 0%, rgba(253, 233, 180, 0) 40%);"></div>
+
+    <!-- ================= 顶部导航 ================= -->
+    <nav id="page-toc" class="sticky top-0 z-40 bg-[#f5faff]/85 backdrop-blur-md border-b border-[#dbeefe] shadow-sm">
+        <div class="max-w-6xl mx-auto px-4 pt-2.5">
+            <a href="#top" class="inline-flex items-center gap-2">
+                <img src="logo.png" alt="四海" class="w-8 h-8 rounded-lg">
+                <span class="text-xl font-black text-gray-900">四海</span>
+            </a>
+        </div>
+        <div class="max-w-6xl mx-auto px-4 pt-1 pb-2.5">
+            <div class="flex items-center gap-1 overflow-x-auto no-scrollbar text-sm">
+                <a href="#intro" class="shrink-0 px-3 py-1.5 rounded-lg text-gray-500 hover:text-brand hover:bg-sky-50 font-medium transition-colors whitespace-nowrap">滴水成海</a>
+                <a href="#meaning" class="shrink-0 px-3 py-1.5 rounded-lg text-gray-500 hover:text-brand hover:bg-sky-50 font-medium transition-colors whitespace-nowrap">四海何意</a>
+                <a href="#topics" class="shrink-0 px-3 py-1.5 rounded-lg text-gray-500 hover:text-brand hover:bg-sky-50 font-medium transition-colors whitespace-nowrap">群里聊什么</a>
+                <a href="#join-us" class="shrink-0 px-3 py-1.5 rounded-lg text-gray-500 hover:text-brand hover:bg-sky-50 font-medium transition-colors whitespace-nowrap">加入我们</a>
+                <a href="#time-machine" class="shrink-0 px-3 py-1.5 rounded-lg text-gray-500 hover:text-brand hover:bg-sky-50 font-medium transition-colors whitespace-nowrap">日报时光机</a>
+                <a href="waves.html" class="shrink-0 px-3 py-1.5 rounded-lg text-gray-500 hover:text-brand hover:bg-sky-50 font-medium transition-colors whitespace-nowrap">浪花集</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要内容区域：紧凑卡片流（参照新茧布局） -->
+    <main id="top" class="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-16">
+
+        <!-- === 每日一签·金句（紧凑卡片） === -->
+        <div class="bento-card relative overflow-hidden" style="background: linear-gradient(135deg, #F0FAFE 0%, #DCF0FC 50%, #FDF3D8 100%);">
+            <div class="p-5 sm:p-6">
+                <div class="flex items-start gap-4">
+                    <div class="shrink-0 w-10 h-10 rounded-full bg-[#CFE9F9] flex items-center justify-center text-[#0EA5E9] mt-1">
+                        <i class="fas fa-feather-alt text-lg"></i>
+                    </div>
+                    <div class="flex-grow min-w-0">
+                        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#CFE9F9]/80 text-[#0369A1] text-xs font-bold mb-3">
+                            <i class="fas fa-quote-left text-[10px]"></i> 每日一签 · 金句
+                        </div>
+                        <p id="daily-quote-text" class="text-base sm:text-lg font-bold text-slate-800 leading-relaxed mb-2 font-serif-cn"></p>
+                        <p class="text-xs text-slate-400 mb-4">
+                            <span id="daily-quote-author" class="font-medium text-slate-500">群友金句</span>
+                            <span id="daily-quote-meta" class="ml-2"></span>
+                        </p>
+                        <button id="daily-quote-refresh" type="button"
+                            class="px-4 py-2 rounded-lg bg-[#E6F4FC] hover:bg-[#CFE9F9] text-[#0369A1] text-sm font-bold border border-[#B5E0F4] hover:border-[#7FC2E8] transition-all flex items-center gap-1.5 shadow-sm cursor-pointer">
+                            <i class="fas fa-sync-alt"></i> 换一句
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- === 我们这群人 + 星空（同一张卡片：文字在左，星星在右） === -->
+        <section id="intro" class="bento-card hero-gradient relative overflow-hidden p-8 sm:p-12 min-h-[460px]">
+            <!-- Three.js 星空画布（覆盖整卡） -->
+            <canvas id="star-canvas" class="absolute inset-0 w-full h-full" aria-hidden="true"></canvas>
+
+            <!-- 文字可读性蒙版 -->
+            <div class="hero-mask"></div>
+
+            <!-- 背景柔光晕 -->
+            <div class="absolute bottom-0 left-0 w-72 h-72 bg-cyan-100/30 rounded-full blur-3xl pointer-events-none"></div>
+
+            <!-- 文案区（点击穿透到画布） -->
+            <div class="relative z-10 max-w-xl pointer-events-none">
+                <h2 class="text-3xl sm:text-4xl font-black text-gray-900 leading-[1.15] mb-8">
+                    一个志同道合的<br>
+                    <span class="text-brand">赛博根据地</span>
+                </h2>
+                <div class="text-gray-700 text-[15px] sm:text-base leading-relaxed space-y-2.5 font-serif-cn">
+                    <p>教员说：四海翻腾云水怒，五洲震荡风雷激。</p>
+                    <p>一滴水的力量也许微不足道，<br>但汇聚起来，便是惊涛拍岸的磅礴。</p>
+                    <p class="pt-2 text-brand font-semibold">我们都是来自五湖四海，<br>为了一个共同的革命目标，走到一起来了。</p>
+                </div>
+                <p class="font-serif-cn text-[#0C4A6E] text-lg pt-2">聚水滴 · 起浪花 · 汇四海</p>
+            </div>
+
+            <!-- 浮动金句卡片（点星触发，出现在点击处附近） -->
+            <div id="hero-quote-popup" class="hidden absolute z-30 max-w-xs sm:max-w-sm">
+                <div class="bento-card p-5 bg-white/95 backdrop-blur-md border-sky-200 shadow-2xl shadow-sky-500/20">
+                    <p id="hero-quote-text" class="text-gray-800 font-serif-cn text-base leading-relaxed mb-3"></p>
+                    <p class="text-xs text-gray-400 flex items-center gap-2">
+                        <i class="fas fa-feather-alt text-brand"></i>
+                        <span id="hero-quote-meta"></span>
+                    </p>
+                </div>
+                <button id="hero-quote-close"
+                    class="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-white shadow border border-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-700 transition-colors"
+                    aria-label="关闭">
+                    <i class="fas fa-times text-xs"></i>
+                </button>
+            </div>
+
+            <!-- 提示标语 -->
+            <div class="absolute bottom-4 right-4 z-10 text-xs text-gray-500/80 hidden lg:flex items-center gap-1.5 pointer-events-none">
+                <i class="fas fa-mouse-pointer text-brand/60"></i>
+                <span>点点这片星海，听同志们说过的话</span>
+            </div>
+        </section>
+
+        <!-- === 漫道，何意？（三列卡片） === -->
+        <div id="meaning" class="space-y-6">
+            <h2 class="section-title">四海，何意？</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- 卡片 1 -->
+                <div class="bento-card p-8 relative overflow-hidden group">
+                    <div class="quote-icon top-4 right-4">水</div>
+                    <div class="relative z-10">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">水滴 · 石穿</h3>
+                        <p class="text-gray-700 text-[15px] leading-8 font-serif-cn">
+                            一滴水，轻，小，没有分量。<br>
+                            可「天下莫柔弱于水，<br>
+                            而攻坚强者莫之能胜。」<br>
+                            个人之于社会，<br>
+                            就像水滴之于大海。<br>
+                            <span class="text-brand font-bold">不积小流，无以成江海。</span>
+                        </p>
+                    </div>
+                    <div class="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-sky-400 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                </div>
+                <!-- 卡片 2 -->
+                <div class="bento-card p-8 relative overflow-hidden group">
+                    <div class="quote-icon top-4 right-4">浪</div>
+                    <div class="relative z-10">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">浪花 · 奔涌</h3>
+                        <p class="text-gray-700 text-[15px] leading-8 font-serif-cn">
+                            四海翻腾云水怒，<br>
+                            滴水掀不起浪，<br>
+                            但千万滴水凝聚力量，<br>
+                            就势不可挡。<br>
+                            <span class="text-brand font-bold"><span class="whitespace-nowrap">人民群众不仅是浩瀚的力量之海，</span><span class="whitespace-nowrap">也是浩瀚的智慧之海。</span></span>
+                        </p>
+                    </div>
+                    <div class="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-400 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                </div>
+                <!-- 卡片 3 -->
+                <div class="bento-card p-8 relative overflow-hidden group">
+                    <div class="quote-icon top-4 right-4">海</div>
+                    <div class="relative z-10">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">海洋 · 汇聚</h3>
+                        <p class="text-gray-700 text-[15px] leading-8 font-serif-cn">
+                            氵+每就是海，<br>
+                            每一滴水融汇成海，<br>
+                            每一个同志聚集成了「四海」，<br>
+                            我们来自五湖四海，走在一起，<br>
+                            愿不断收获，共同成长。<br>
+                            <span class="text-brand font-bold">一万年太久，只争朝夕。</span>
+                        </p>
+                    </div>
+                    <div class="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- === 群里聊什么 === -->
+        <div id="topics" class="space-y-6">
+            <h2 class="section-title">群里聊什么</h2>
+            <p class="text-gray-600 text-sm sm:text-base leading-relaxed font-serif-cn -mt-2 pl-6">
+                从时局到家常，从历史到烟火——<br class="hidden sm:inline">每天都在群里真实发生。
+            </p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                <div class="bento-card p-6 group">
+                    <span class="w-9 h-9 rounded-xl bg-sky-50 text-brand flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
+                        <i class="fas fa-landmark"></i>
+                    </span>
+                    <h3 class="text-base font-bold text-gray-900 mb-2">时事纵横</h3>
+                    <p class="text-gray-500 text-sm leading-relaxed">社保、税收、AI与就业——大事小情摆开来，一起看门道。</p>
+                </div>
+                <div class="bento-card p-6 group">
+                    <span class="w-9 h-9 rounded-xl bg-sky-50 text-brand flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
+                        <i class="fas fa-flag"></i>
+                    </span>
+                    <h3 class="text-base font-bold text-gray-900 mb-2">红色记忆</h3>
+                    <p class="text-gray-500 text-sm leading-relaxed">重走长征路、红色文旅打卡——历史聊着聊着，就聊活了。</p>
+                </div>
+                <div class="bento-card p-6 group">
+                    <span class="w-9 h-9 rounded-xl bg-sky-50 text-brand flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
+                        <i class="fas fa-toolbox"></i>
+                    </span>
+                    <h3 class="text-base font-bold text-gray-900 mb-2">生活百科</h3>
+                    <p class="text-gray-500 text-sm leading-relaxed">装修避坑、口罩保存、爸妈参保——家长里短，总有人搭把手。</p>
+                </div>
+                <div class="bento-card p-6 group">
+                    <span class="w-9 h-9 rounded-xl bg-sky-50 text-brand flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
+                        <i class="fas fa-earth-asia"></i>
+                    </span>
+                    <h3 class="text-base font-bold text-gray-900 mb-2">天南海北</h3>
+                    <p class="text-gray-500 text-sm leading-relaxed">走南闯北的见闻，家乡的风物，路上的故事——闲话不闲，句句都是烟火气。</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- === 加入我们（紧凑卡片） === -->
+        <div id="join-us" class="space-y-6">
+            <h2 class="section-title">加入我们</h2>
+            <section class="bento-card relative overflow-hidden bg-gradient-to-br from-[#eff8ff] to-white">
+                <div class="p-8 relative z-10">
+                    <div class="max-w-2xl">
+                        <p class="text-gray-700 text-base sm:text-lg leading-relaxed mb-6 font-serif-cn">
+                            如果你也是来自五湖四海的同志——<br class="sm:hidden">欢迎加入四海。
+                        </p>
+                        <ol class="space-y-3 mb-6">
+                            <li class="flex gap-3 items-start">
+                                <span class="flex-shrink-0 w-7 h-7 rounded-full bg-sky-50 text-brand text-sm font-bold flex items-center justify-center mt-0.5 border border-sky-100">1</span>
+                                <span class="text-gray-700 leading-relaxed pt-0.5">微博私信 <a href="https://weibo.com/u/2468223825" target="_blank" rel="noopener" class="text-brand font-bold hover:underline">@秦书宝</a>，询问加入四海的方式</span>
+                            </li>
+                            <li class="flex gap-3 items-start">
+                                <span class="flex-shrink-0 w-7 h-7 rounded-full bg-sky-50 text-brand text-sm font-bold flex items-center justify-center mt-0.5 border border-sky-100">2</span>
+                                <span class="text-gray-700 leading-relaxed pt-0.5">有任何困惑，随时再私信沟通</span>
+                            </li>
+                        </ol>
+                        <a href="https://weibo.com/u/2468223825" target="_blank" rel="noopener"
+                            class="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl bg-brand text-white font-bold shadow-lg shadow-sky-500/30 hover:bg-sky-600 transition-colors">
+                            <i class="fab fa-weibo"></i>
+                            微博私信 @秦书宝
+                        </a>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- === 日报时光机（左日历 + 右小模块，参照新茧） === -->
+        <div id="time-machine" class="space-y-6">
+            <h2 class="section-title">日报时光机</h2>
+
+            <div class="grid grid-cols-1 lg:grid-cols-[1.8fr_0.7fr] gap-6 md:gap-8 items-stretch">
+                <!-- 左：日历卡片 -->
+                <div class="bento-card p-6 flex flex-col h-full">
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-5">
+                        <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+                            <i class="far fa-calendar-check text-brand"></i> 四海日报
+                        </h3>
+                        <div class="relative flex items-center gap-1 bg-gray-50 rounded-xl p-1 border border-gray-100 self-start sm:self-auto">
+                            <button id="prev-month"
+                                class="w-7 h-7 flex items-center justify-center rounded hover:bg-white hover:shadow-sm text-gray-500 transition-all">
+                                <i class="fas fa-chevron-left text-xs"></i>
+                            </button>
+                            <span id="current-date-display"
+                                class="text-xs font-bold text-gray-700 w-20 text-center font-mono pt-0.5 select-none"></span>
+                            <button id="next-month"
+                                class="w-7 h-7 flex items-center justify-center rounded hover:bg-white hover:shadow-sm text-gray-500 transition-all">
+                                <i class="fas fa-chevron-right text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 星期头 -->
+                    <div class="grid grid-cols-7 gap-1 mb-2 text-center">
+                        <div class="text-[10px] font-bold text-gray-300 uppercase">Sun</div>
+                        <div class="text-[10px] font-bold text-gray-300 uppercase">Mon</div>
+                        <div class="text-[10px] font-bold text-gray-300 uppercase">Tue</div>
+                        <div class="text-[10px] font-bold text-gray-300 uppercase">Wed</div>
+                        <div class="text-[10px] font-bold text-gray-300 uppercase">Thu</div>
+                        <div class="text-[10px] font-bold text-gray-300 uppercase">Fri</div>
+                        <div class="text-[10px] font-bold text-gray-300 uppercase">Sat</div>
+                    </div>
+
+                    <!-- 日历格子 -->
+                    <div id="calendar-days" class="calendar-grid flex-grow content-start"></div>
+
+                    <!-- 底部 CTA -->
+                    <div class="mt-4 pt-4 border-t border-gray-100">
+                        <a href="#" id="latest-report-btn" target="_blank" rel="noopener"
+                            class="w-full px-4 py-2.5 rounded-lg bg-brand text-white text-sm font-bold text-center hover:bg-sky-700 shadow-md shadow-sky-500/20 transition-all flex items-center justify-center gap-2">
+                            <i class="fas fa-book-open"></i> 阅读最新日报
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 右：小模块 1 个 -->
+                <div class="grid grid-cols-1 gap-x-5 gap-y-8 h-full auto-rows-fr">
+                    <a href="waves.html" class="bento-card p-6 flex flex-col min-h-[220px] group hover:-translate-y-1 hover:shadow-lg transition-all">
+                        <h3 class="text-lg font-black text-gray-900 mb-3 flex items-center gap-3">
+                            <img src="logo.png" alt="" class="w-9 h-9 rounded-xl group-hover:scale-105 transition-transform">
+                            浪花集
+                        </h3>
+                        <p class="text-gray-500 text-sm leading-relaxed mb-4">
+                            往期日报翻起的浪花——热议话题、有问必答、每日精选，一张卡一朵浪。
+                        </p>
+                        <span class="mt-auto w-full py-2.5 rounded-lg bg-sky-50 text-brand text-sm font-bold text-center flex items-center justify-center gap-2 group-hover:bg-brand group-hover:text-white transition-colors">
+                            <i class="fas fa-arrow-right-to-bracket"></i> 进入浪花集
+                        </span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
     </main>
+
+    <!-- ================= 页脚（紧凑） ================= -->
+    <footer class="w-full py-8 border-t border-[#dbeefe] bg-white mt-8">
+        <div class="max-w-6xl mx-auto px-4 text-center">
+            <div class="flex justify-center items-center gap-2 mb-2">
+                <img src="logo.png" alt="" class="w-5 h-5 rounded-md">
+                <span class="font-bold text-gray-700">四海日报</span>
+            </div>
+            <p class="text-gray-400 text-xs">四海翻腾云水怒，五洲震荡风雷激 · <span id="footer-year"></span></p>
+        </div>
+    </footer>
+
+    <!-- 金句数据 -->
+    <script src="assets/public_quotes.js"></script>
+
+    <!-- 页面逻辑 -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById('footer-year').textContent = new Date().getFullYear();
+
+            const QUOTES = window.PUBLIC_QUOTES || [];
+
+            // ============ 每日一签 ============
+            const dqText = document.getElementById('daily-quote-text');
+            const dqAuthor = document.getElementById('daily-quote-author');
+            const dqMeta = document.getElementById('daily-quote-meta');
+
+            function renderDailyQuote(q) {
+                if (!q) return;
+                dqText.textContent = q.text;
+                dqAuthor.textContent = '群友金句';
+                dqMeta.textContent = (q.section || '四海') + ' · ' + (q.date || '');
+            }
+            function shuffleDailyQuote() {
+                if (!QUOTES.length) return;
+                renderDailyQuote(QUOTES[Math.floor(Math.random() * QUOTES.length)]);
+            }
+            shuffleDailyQuote();
+            document.getElementById('daily-quote-refresh').addEventListener('click', shuffleDailyQuote);
+
+            // ============ 星空金句弹卡（点星 → 随机一条，出现在点击处附近） ============
+            const popup = document.getElementById('hero-quote-popup');
+            const popupText = document.getElementById('hero-quote-text');
+            const popupMeta = document.getElementById('hero-quote-meta');
+            let popupHideTimer = null;
+
+            window.__showQuoteAt = function (clientX, clientY) {
+                if (!QUOTES.length) return;
+                const q = QUOTES[Math.floor(Math.random() * QUOTES.length)];
+                popupText.textContent = q.text;
+                popupMeta.textContent = '群友金句 · ' + (q.section || '') + ' · ' + (q.date || '');
+
+                popup.classList.remove('hidden');
+                // 定位到点击处附近，并限制在卡片内
+                const card = document.getElementById('intro');
+                const cardRect = card.getBoundingClientRect();
+                const pw = popup.offsetWidth || 300;
+                const ph = popup.offsetHeight || 140;
+                let x = clientX - cardRect.left + 14;
+                let y = clientY - cardRect.top - 20;
+                if (x + pw > cardRect.width - 8) x = clientX - cardRect.left - pw - 14;
+                if (y + ph > cardRect.height - 8) y = cardRect.height - ph - 8;
+                if (y < 8) y = 8;
+                if (x < 8) x = 8;
+                popup.style.left = x + 'px';
+                popup.style.top = y + 'px';
+
+                clearTimeout(popupHideTimer);
+            };
+            window.__hideQuote = function () {
+                popup.classList.add('hidden');
+            };
+            document.getElementById('hero-quote-close').addEventListener('click', function () {
+                popup.classList.add('hidden');
+            });
+
+            // ============ 日历 ============
+            const calendarDays = document.getElementById('calendar-days');
+            const currentDateDisplay = document.getElementById('current-date-display');
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            let currentYear = today.getFullYear();
+            let currentMonth = today.getMonth();
+
+            const REPORT_DATES = new Set(window.REPORT_DATES || []);
+
+            // 日报与主页同仓同目录（GitHub Pages · four-seas 仓库），直接用相对文件名
+            function reportUrl(dateStr) {
+                return 'fourseas_daily_' + dateStr + '.html';
+            }
+
+            // ── 日历判定 ──
+            // REPORT_DATES（assets/public_quotes.js）与日报文件同批推送、同批生效，
+            // 不做在线探测：在表里 = 已出报，不在表 = 未出报。
+            function lightUp(dateStr, dayDiv) {
+                dayDiv.classList.remove('disabled');
+                dayDiv.classList.add('has-report');
+                dayDiv.title = '阅读 ' + dateStr + ' 日报';
+                dayDiv.onclick = function () { window.open(reportUrl(dateStr), '_blank'); };
+            }
+
+                        function renderCalendar(year, month) {
+                calendarDays.innerHTML = '';
+                currentDateDisplay.textContent = year + '.' + String(month + 1).padStart(2, '0');
+
+                const firstDay = new Date(year, month, 1).getDay();
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+                for (let i = 0; i < firstDay; i++) {
+                    const d = document.createElement('div');
+                    d.classList.add('calendar-day', 'empty');
+                    calendarDays.appendChild(d);
+                }
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const dayDiv = document.createElement('div');
+                    dayDiv.classList.add('calendar-day');
+                    dayDiv.textContent = day;
+
+                    const thisDate = new Date(year, month, day);
+                    thisDate.setHours(0, 0, 0, 0);
+                    const isToday = thisDate.getTime() === today.getTime();
+                    const isFuture = thisDate > today;
+                    const dateStr = year + '-' + String(month + 1).padStart(2, '0') + '-' + String(day).padStart(2, '0');
+
+                    if (isToday) dayDiv.classList.add('today');
+
+                    if (REPORT_DATES.has(dateStr)) {
+                        lightUp(dateStr, dayDiv);
+                    } else {
+                        dayDiv.classList.add('disabled');
+                        dayDiv.title = isFuture ? '未到日期' : (isToday ? '今日日报稍后更新' : dateStr + ' 未出日报');
+                    }
+                    calendarDays.appendChild(dayDiv);
+                }
+            }
+
+            renderCalendar(currentYear, currentMonth);
+
+            document.getElementById('prev-month').addEventListener('click', () => {
+                currentMonth--;
+                if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+                renderCalendar(currentYear, currentMonth);
+            });
+            document.getElementById('next-month').addEventListener('click', () => {
+                currentMonth++;
+                if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+                renderCalendar(currentYear, currentMonth);
+            });
+
+            // ============ 阅读最新日报：智能回退（最多回看 7 天） ============
+            const latestBtn = document.getElementById('latest-report-btn');
+            (function () {
+                for (let back = 1; back <= 7; back++) {
+                    const d = new Date(today);
+                    d.setDate(d.getDate() - back);
+                    const dateStr = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+                    if (REPORT_DATES.has(dateStr)) {
+                        latestBtn.href = reportUrl(dateStr);
+                        return;
+                    }
+                }
+                latestBtn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    alert('最新一期日报尚未发布，敬请期待');
+                });
+            })();
+        });
+    </script>
+
+    <!-- Three.js 星空（文字在左，亮星集中在右半边） -->
+    <script>
+        window.addEventListener('load', function () {
+            if (typeof THREE === 'undefined') return;
+            const canvas = document.getElementById('star-canvas');
+            const card = document.getElementById('intro');
+            if (!canvas || !card) return;
+
+            const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(60, 1, 0.1, 100);
+            camera.position.z = 14;
+
+            function resize() {
+                const w = card.clientWidth, h = card.clientHeight;
+                renderer.setSize(w, h, false);
+                camera.aspect = w / h;
+                camera.updateProjectionMatrix();
+            }
+            resize();
+            window.addEventListener('resize', resize);
+
+            // 可视区域尺寸（用于把亮星分布到右半边）
+            const visH = 2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * camera.position.z;
+            const visW = visH * camera.aspect;
+
+            // ---- 背景星海（整卡散布，微光） ----
+            // 2026-10-14：由 260 减到 150，微光调淡，降低整体密度
+            const bgCount = 150;
+            const bgPos = new Float32Array(bgCount * 3);
+            for (let i = 0; i < bgCount; i++) {
+                bgPos[i * 3] = (Math.random() - 0.5) * visW * 0.96;
+                bgPos[i * 3 + 1] = (Math.random() - 0.5) * visH * 0.9;
+                bgPos[i * 3 + 2] = (Math.random() - 0.5) * 4 - 1;
+            }
+            const bgGeo = new THREE.BufferGeometry();
+            bgGeo.setAttribute('position', new THREE.BufferAttribute(bgPos, 3));
+            const bgMat = new THREE.PointsMaterial({ color: 0x9ec8ee, size: 0.045, transparent: true, opacity: 0.45 });
+            scene.add(new THREE.Points(bgGeo, bgMat));
+
+            // ---- 可点击亮星（深绿小点；自浮动 + 鼠标吸引放大 + 近邻连线） ----
+            // 2026-10-14 调整：原来把金句全量（501 条）铺成网格，密到密恐。
+            // 改成每次随机抽一小撮，按不规则的云团散布，外轮廓带低频起伏，
+            // 不做规整凸包；整体往左漫延一点，越靠外越稀。
+            const QUOTES = window.PUBLIC_QUOTES || [];
+            const STAR_MIN = 80, STAR_MAX = 120;
+            const starCount = Math.max(1, Math.min(QUOTES.length,
+                STAR_MIN + Math.floor(Math.random() * (STAR_MAX - STAR_MIN + 1))));
+            const starGroup = new THREE.Group();
+            scene.add(starGroup);
+
+            const starColor = new THREE.Color(0x0c4d7d);
+            const starMeshGeo = new THREE.SphereGeometry(0.09, 10, 10);
+            const stars = []; // 每颗星一个 mesh，便于独立 scale / opacity
+
+            // 云团几何：椭圆打底 + 几道低频正弦让外轮廓不规则；云心偏右，左边漫过中线
+            const CLOUD_CX = visW * 0.15, CLOUD_CY = 0;
+            const CLOUD_AX = visW * 0.34, CLOUD_AY = visH * 0.44;
+            const ph = [0, 1, 2, 3].map(() => Math.random() * Math.PI * 2);
+            function envelope(theta) { // 归一化半径上限，起伏约 ±25%
+                return 1 + 0.14 * Math.sin(3 * theta + ph[0]) + 0.09 * Math.sin(5 * theta + ph[1])
+                         + 0.05 * Math.sin(7 * theta + ph[2]) + 0.04 * Math.sin(11 * theta + ph[3]);
+            }
+
+            for (let i = 0; i < starCount; i++) {
+                const mat = new THREE.MeshBasicMaterial({ color: starColor, transparent: true, opacity: 0 });
+                const mesh = new THREE.Mesh(starMeshGeo, mat);
+                // 极坐标撒点：方向随机、半径随 u^0.62 收，天然疏密不均、外缘毛糙
+                const theta = Math.random() * Math.PI * 2;
+                const rr = Math.pow(Math.random(), 0.62) * envelope(theta);
+                mesh.position.set(
+                    CLOUD_CX + Math.cos(theta) * CLOUD_AX * rr,
+                    CLOUD_CY + Math.sin(theta) * CLOUD_AY * rr,
+                    (Math.random() - 0.5) * 1.5
+                );
+                mesh.userData = {
+                    vx: (Math.random() - 0.5) * 0.008,
+                    vy: (Math.random() - 0.5) * 0.008,
+                    baseOpacity: 0.5 + Math.random() * 0.4,
+                    delay: Math.random() * 800, // 随机出现：每颗星淡入时间错开
+                    pulseUntil: 0
+                };
+                starGroup.add(mesh);
+                stars.push(mesh);
+            }
+
+            // ---- 连接线（内部近邻，随星星移动每帧重算） ----
+            const LINK_DIST = visW * 0.065; // 星少了，连线半径收一点，保持通透
+            const LINK_DIST_SQ = LINK_DIST * LINK_DIST;
+            const linkGeo = new THREE.BufferGeometry();
+            const linkMat = new THREE.LineBasicMaterial({ color: 0x0c4d7d, transparent: true, opacity: 0.15 });
+            const links = new THREE.LineSegments(linkGeo, linkMat);
+            links.renderOrder = -1;
+            starGroup.add(links);
+            const lineBuf = [];
+            function updateLinks() {
+                lineBuf.length = 0;
+                const deg = new Array(stars.length).fill(0);
+                const connected = new Set();
+
+                function addLine(i, j) {
+                    const key = i < j ? i + '-' + j : j + '-' + i;
+                    if (connected.has(key)) return false;
+                    connected.add(key);
+                    deg[i]++; deg[j]++;
+                    const pi = stars[i].position, pj = stars[j].position;
+                    lineBuf.push(pi.x, pi.y, pi.z, pj.x, pj.y, pj.z);
+                    return true;
+                }
+
+                // 0) 2026-10-14：去掉原来的凸包闭合轮廓。
+                //    那圈把最外圈星连成的等比多边形，正是"最外围太规整"的来源；
+                //    现在外缘由下面的近邻连线自然长出来，毛糙、不规则。
+
+                // 1) 自然近邻连线（内部，中心加密）
+                for (let i = 0; i < stars.length; i++) {
+                    const pi = stars[i].position;
+                    for (let j = i + 1; j < stars.length; j++) {
+                        const pj = stars[j].position;
+                        const dx = pi.x - pj.x, dy = pi.y - pj.y, dz = pi.z - pj.z;
+                        if (dx * dx + dy * dy + dz * dz < LINK_DIST_SQ) {
+                            addLine(i, j);
+                        }
+                    }
+                }
+
+                // 2) 保证每颗星至少 2 条连线：对度数不足的星，按最近距离补连
+                for (let i = 0; i < stars.length; i++) {
+                    if (deg[i] >= 2) continue;
+                    const pi = stars[i].position;
+                    const cand = [];
+                    for (let j = 0; j < stars.length; j++) {
+                        if (j === i) continue;
+                        const key = i < j ? i + '-' + j : j + '-' + i;
+                        if (connected.has(key)) continue;
+                        const pj = stars[j].position;
+                        const dx = pi.x - pj.x, dy = pi.y - pj.y, dz = pi.z - pj.z;
+                        cand.push({ j: j, d: dx * dx + dy * dy + dz * dz });
+                    }
+                    cand.sort((a, b) => a.d - b.d);
+                    for (const c of cand) {
+                        if (deg[i] >= 2) break;
+                        addLine(i, c.j);
+                    }
+                }
+
+                linkGeo.setAttribute('position', new THREE.Float32BufferAttribute(lineBuf, 3));
+            }
+
+            // ---- 金尘：右上角晨光洒下的暖金粒子（稀疏点缀，随光幕斜落） ----
+            const DUST_COUNT = 40;
+            const dustGeo = new THREE.BufferGeometry();
+            const dustPos = new Float32Array(DUST_COUNT * 3);
+            const dustBaseX = [], dustBaseY = [], dustPhase = [], dustSway = [], dustFall = [], dustDrift = [];
+            function dustSpawn(i, fromTop) {
+                dustBaseX[i] = visW * (0.06 + Math.random() * 0.40);
+                dustBaseY[i] = (fromTop ? 0.55 + Math.random() * 0.30 : 0.15 + Math.random() * 0.70) * visH;
+                dustPhase[i] = Math.random() * Math.PI * 2;
+                dustSway[i] = 0.12 + Math.random() * 0.22;
+                dustFall[i] = 0.8 + Math.random() * 0.8;        // 每秒下坠（世界单位）
+                dustDrift[i] = -(0.05 + Math.random() * 0.18);  // 随光幕略向左漂
+                dustPos[i * 3] = dustBaseX[i];
+                dustPos[i * 3 + 1] = dustBaseY[i];
+                dustPos[i * 3 + 2] = (Math.random() - 0.5) * 1.2;
+            }
+            for (let i = 0; i < DUST_COUNT; i++) dustSpawn(i, false);
+            dustGeo.setAttribute('position', new THREE.BufferAttribute(dustPos, 3));
+            const dustMat = new THREE.PointsMaterial({
+                color: 0xF3D98C, size: 0.13, transparent: true, opacity: 0.0,
+                sizeAttenuation: true, depthWrite: false
+            });
+            scene.add(new THREE.Points(dustGeo, dustMat));
+            let lastFrame = performance.now();
+
+            // ---- 鼠标（NDC → 世界坐标 z=0 平面），用于附近星星放大 ----
+            const ndcMouse = new THREE.Vector2(-10, -10);
+            const mouseWorld = new THREE.Vector3();
+            let mouseActive = false;
+            function updateMouseWorld() {
+                const v = new THREE.Vector3(ndcMouse.x, ndcMouse.y, 0.5);
+                v.unproject(camera);
+                const dir = v.sub(camera.position).normalize();
+                const dist = -camera.position.z / dir.z;
+                mouseWorld.copy(camera.position).add(dir.multiplyScalar(dist));
+            }
+
+            // ---- 交互：桌面端悬停显示金句，移动端点一下显示 ----
+            const raycaster = new THREE.Raycaster();
+            const pointer = new THREE.Vector2();
+            let activeStar = null; // 当前悬停的星（避免同一颗星反复重新随机）
+
+            function pickAt(clientX, clientY) {
+                const rect = canvas.getBoundingClientRect();
+                pointer.x = ((clientX - rect.left) / rect.width) * 2 - 1;
+                pointer.y = -((clientY - rect.top) / rect.height) * 2 + 1;
+                raycaster.setFromCamera(pointer, camera);
+                return raycaster.intersectObjects(stars, false);
+            }
+
+            function pulseCluster(center) {
+                const now = performance.now();
+                center.userData.pulseUntil = now + 1500;
+                const nearby = stars
+                    .filter(p => p !== center && p.position.distanceTo(center.position) < 2.5)
+                    .sort((a, b) => a.position.distanceTo(center.position) - b.position.distanceTo(center.position))
+                    .slice(0, 5);
+                nearby.forEach((p, i) => {
+                    setTimeout(() => { p.userData.pulseUntil = performance.now() + 600; }, i * 130);
+                });
+            }
+
+            const isTouch = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+            if (isTouch) {
+                canvas.addEventListener('click', function (e) {
+                    const hits = pickAt(e.clientX, e.clientY);
+                    if (hits.length > 0) {
+                        if (window.__showQuoteAt) window.__showQuoteAt(e.clientX, e.clientY);
+                        pulseCluster(hits[0].object);
+                    } else if (window.__hideQuote) {
+                        window.__hideQuote();
+                    }
+                });
+            } else {
+                canvas.addEventListener('pointermove', function (e) {
+                    const rect = canvas.getBoundingClientRect();
+                    ndcMouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+                    ndcMouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+                    updateMouseWorld();
+                    mouseActive = true;
+
+                    const hits = pickAt(e.clientX, e.clientY);
+                    if (hits.length > 0) {
+                        if (hits[0].object !== activeStar && window.__showQuoteAt) {
+                            activeStar = hits[0].object;
+                            window.__showQuoteAt(e.clientX, e.clientY);
+                        }
+                    } else {
+                        activeStar = null;
+                        if (window.__hideQuote) window.__hideQuote();
+                    }
+                });
+                canvas.addEventListener('mouseleave', function () {
+                    mouseActive = false;
+                    ndcMouse.set(-10, -10);
+                });
+            }
+
+            // ---- 动画循环：自浮动 + 鼠标吸引放大 + 脉冲 + 连线重算 ----
+            const MOUSE_RADIUS = 3.0; // 鼠标影响半径（世界单位）
+            function animate() {
+                requestAnimationFrame(animate);
+                const now = performance.now();
+
+                for (let i = 0; i < stars.length; i++) {
+                    const p = stars[i];
+                    p.position.x += p.userData.vx;
+                    p.position.y += p.userData.vy;
+
+                    // 越出云团轮廓就拉回并按径向反弹，外缘始终不规则（不再是矩形框）
+                    const rx = (p.position.x - CLOUD_CX) / CLOUD_AX;
+                    const ry = (p.position.y - CLOUD_CY) / CLOUD_AY;
+                    const rn = Math.hypot(rx, ry);
+                    if (rn > 1e-4) {
+                        const lim = envelope(Math.atan2(ry, rx));
+                        if (rn > lim) {
+                            const k = lim / rn;
+                            p.position.x = CLOUD_CX + rx * k * CLOUD_AX;
+                            p.position.y = CLOUD_CY + ry * k * CLOUD_AY;
+                            const nx = rx / rn, ny = ry / rn;
+                            const vn = nx * (p.userData.vx / CLOUD_AX) + ny * (p.userData.vy / CLOUD_AY);
+                            if (vn > 0) {
+                                p.userData.vx -= 2 * vn * nx * CLOUD_AX;
+                                p.userData.vy -= 2 * vn * ny * CLOUD_AY;
+                            }
+                        }
+                    }
+
+                    let attract = 0;
+                    if (mouseActive) {
+                        const dx = mouseWorld.x - p.position.x;
+                        const dy = mouseWorld.y - p.position.y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        if (dist < MOUSE_RADIUS) {
+                            attract = (MOUSE_RADIUS - dist) / MOUSE_RADIUS;
+                            p.position.x += dx * 0.004 * attract;
+                            p.position.y += dy * 0.004 * attract;
+                        }
+                    }
+
+                    let pulse = 0;
+                    if (now < p.userData.pulseUntil) {
+                        const t = (p.userData.pulseUntil - now) / 700;
+                        pulse = Math.sin(t * Math.PI);
+                    }
+
+                    p.material.opacity = Math.min(1, p.userData.baseOpacity + attract * 0.5 + pulse * 0.5);
+                    p.scale.setScalar(1 + attract * 1.2 + pulse * 1.5);
+                }
+
+                // 金尘：下坠 + 左漂 + 摇曳，出界后从右上重新生成
+                const dt = Math.min(0.05, (now - lastFrame) / 1000);
+                lastFrame = now;
+                for (let i = 0; i < DUST_COUNT; i++) {
+                    dustBaseY[i] -= dustFall[i] * dt;
+                    dustBaseX[i] += dustDrift[i] * dt;
+                    if (dustBaseY[i] < -visH * 0.55 || dustBaseX[i] < -visW * 0.5) dustSpawn(i, true);
+                    dustPos[i * 3] = dustBaseX[i] + Math.sin(now * 0.0006 * (0.6 + dustSway[i]) + dustPhase[i]) * dustSway[i];
+                    dustPos[i * 3 + 1] = dustBaseY[i];
+                }
+                dustGeo.attributes.position.needsUpdate = true;
+                dustMat.opacity = Math.min(1, (now - startTime) / 2000) * (0.55 + 0.2 * Math.sin(now * 0.001));
+
+                updateLinks();
+                renderer.render(scene, camera);
+            }
+
+            // 前 2.5 秒星星 + 连线渐入（每颗星按自己的延迟错开，看起来是随机冒出来的）
+            updateLinks();
+            const startTime = performance.now();
+            const RAMP_MS = 2500, FADE_SPAN = RAMP_MS - 800;
+            function rampIn() {
+                const elapsed = performance.now() - startTime;
+                const t = elapsed / RAMP_MS;
+                stars.forEach(p => {
+                    const k = Math.max(0, Math.min(1, (elapsed - p.userData.delay) / FADE_SPAN));
+                    p.material.opacity = p.userData.baseOpacity * k;
+                });
+                linkMat.opacity = 0.15 * Math.min(1, t);
+                renderer.render(scene, camera);
+                if (t < 1) requestAnimationFrame(rampIn);
+                else animate();
+            }
+            rampIn();
+        });
+    </script>
 </body>
+
 </html>
