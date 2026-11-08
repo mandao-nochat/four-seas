@@ -767,6 +767,9 @@
                                 <span id="fortune-date" class="ml-2">2026-11-06 · 热点话题</span>
                             </p>
                             <div class="flex items-center gap-3">
+                                <button id="fortune-shuffle" type="button" class="px-4 py-2 rounded-lg bg-[#E6F4FC] hover:bg-[#CFE9F9] text-[#0369A1] text-sm font-bold border border-[#B5E0F4] hover:border-[#7FC2E8] transition-all flex items-center gap-1.5 shadow-sm cursor-pointer">
+                                    <i class="fas fa-sync-alt"></i> 换一句
+                                </button>
                                 <a href="#画廊" class="px-4 py-2 rounded-lg bg-[#E6F4FC] hover:bg-[#CFE9F9] text-[#0369A1] text-sm font-bold border border-[#B5E0F4] hover:border-[#7FC2E8] transition-all flex items-center gap-1.5 shadow-sm">
                                     <i class="fas fa-images"></i> 日报画廊
                                 </a>
@@ -2536,5 +2539,76 @@
     }
     </script>
 
+<!-- === 金句换一句：候选池由AI从当日聊天记录挑选（10条，首条为默认展示句） === -->
+<script>
+(function () {
+    var pool = [
+        {
+                "text": "钱是分配物资用的，物资够就不存在钱不够的问题。",
+                "author": "何安基",
+                "date": "2026-11-06 · 热点话题"
+        },
+        {
+                "text": "这就是共产主义",
+                "author": "好奇星",
+                "date": "2026-11-06 · 热点话题"
+        },
+        {
+                "text": "没有门槛的东西很难赚钱",
+                "author": "我没偷猪",
+                "date": "2026-11-06 · 热点话题"
+        },
+        {
+                "text": "AI是自带价值观的，因为语料就会有意志",
+                "author": "含光",
+                "date": "2026-11-06 · 热点话题"
+        },
+        {
+                "text": "没有一个为人民负责的强大政府，AI越强大越可怕",
+                "author": "何安基",
+                "date": "2026-11-06 · 热点话题"
+        },
+        {
+                "text": "我非常不喜欢降本增效的说法。把人极致的工具化……只有人才能为最终结果负责。",
+                "author": "含光",
+                "date": "2026-11-06 · 热点话题"
+        },
+        {
+                "text": "毕竟人的本质是社会关系的总和",
+                "author": "水真好喝-",
+                "date": "2026-11-06 · 热点话题"
+        },
+        {
+                "text": "相逢何必曾相识",
+                "author": "不渡",
+                "date": "2026-11-06 · 热点话题"
+        },
+        {
+                "text": "好久没有这种「抢」红包的快乐了！过年啦！",
+                "author": "镜子",
+                "date": "2026-11-06 · 热点话题"
+        },
+        {
+                "text": "我抢不着也无所谓，毕竟都是在群内流动",
+                "author": "呼吸自己",
+                "date": "2026-11-06 · 热点话题"
+        }
+];
+    var el = document.getElementById("fortune-text");
+    var au = document.getElementById("fortune-author");
+    var dt = document.getElementById("fortune-date");
+    var btn = document.getElementById("fortune-shuffle");
+    if (!el || !au || !btn || !pool || pool.length < 2) return;
+    var idx = 0;
+    btn.addEventListener("click", function () {
+        var next = idx;
+        if (pool.length > 1) { while (next === idx) { next = Math.floor(Math.random() * pool.length); } }
+        idx = next;
+        el.textContent = pool[idx].text;
+        au.textContent = pool[idx].author;
+        if (dt && pool[idx].date) { dt.textContent = pool[idx].date; }
+    });
+})();
+</script>
 </body>
 </html>
