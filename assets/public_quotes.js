@@ -1,4 +1,4 @@
-// 本文件由自动化生成（build_quotes.py），请勿手工编辑格式；新增内容追加到数组末尾
+// 本文件由自动化生成（build_quotes.py），请勿手工编辑格式；筛除记录追加到 CURATED_DROP 后重跑
 window.REPORT_DATES = [
   "2026-11-06",
   "2026-11-07",
