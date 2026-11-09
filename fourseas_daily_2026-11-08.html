@@ -678,6 +678,18 @@
             }
         }
     </style>
+<style>
+.report-date-trigger{display:inline-flex;align-items:center;gap:8px;min-height:40px;border:1px solid transparent;background:transparent;color:#0ea5e9;border-radius:9px;padding:6px 11px;font:inherit;white-space:nowrap;cursor:pointer;transition:background .2s,border-color .2s}
+.report-date-trigger:hover,.report-date-trigger[aria-expanded="true"]{border-color:#0ea5e955;background:color-mix(in srgb,#0ea5e9 8%,white)}.report-date-trigger:focus-visible{outline:2px solid #0ea5e9;outline-offset:2px;border-color:#0ea5e955;background:color-mix(in srgb,#0ea5e9 8%,white)}
+.report-calendar-overlay{position:fixed;inset:0;z-index:10000;background:rgba(15,23,42,.35);display:flex;align-items:center;justify-content:center;padding:16px;overscroll-behavior:contain}.report-calendar-overlay[hidden]{display:none}
+.report-calendar{width:min(100%,360px);background:#fff;color:#1f2937;border-radius:20px;padding:22px;box-shadow:0 24px 70px rgba(15,23,42,.24);font-family:inherit;max-height:calc(100dvh - 32px);overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.report-calendar-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}.report-calendar-top strong{font-size:18px}
+.report-calendar button,.report-calendar select{font:inherit}.report-calendar-nav{border:0;background:#f3f4f6;border-radius:10px;width:36px;height:36px;cursor:pointer;font-size:20px;color:#374151}.report-calendar-close{border:0;background:transparent;border-radius:9999px;color:#64748b;cursor:pointer;padding:6px;width:36px;height:36px}.report-calendar-close:hover{color:#0ea5e9}.report-calendar-nav:disabled{opacity:.3;cursor:not-allowed}
+.report-calendar-controls{display:flex;align-items:center;gap:8px;margin-bottom:15px}.report-calendar-controls select{min-width:0;border:1px solid #e5e7eb;border-radius:9px;background:#fff;padding:7px 3px;flex:1;color:#1f2937}
+.report-calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;text-align:center}.report-calendar-week{font-size:12px;color:#9ca3af;padding:7px 0}
+.report-calendar-day{height:38px;border:0;border-radius:10px;background:transparent;color:#374151;cursor:pointer}.report-calendar-day:not(:disabled):not([aria-disabled="true"]):hover{background:color-mix(in srgb,#0ea5e9 12%,white);color:#0ea5e9}.report-calendar-day.current{background:#0ea5e9;color:white;font-weight:700}.report-calendar-day.today:not(.current){box-shadow:inset 0 0 0 1.5px #0ea5e9;color:#0ea5e9}.report-calendar-day:disabled,.report-calendar-day[aria-disabled="true"]{color:#cbd5e1;cursor:not-allowed}.report-calendar-day[aria-disabled="true"]{position:relative}.report-calendar-day[aria-disabled="true"][data-tip]:hover::after,.report-calendar-day[aria-disabled="true"][data-tip]:focus-visible::after{content:attr(data-tip);position:absolute;z-index:2;bottom:calc(100% + 5px);left:50%;transform:translateX(-50%);width:max-content;max-width:200px;padding:5px 8px;border-radius:6px;background:#1f2937;color:#fff;font-size:12px;font-weight:400;line-height:1.4;white-space:normal;pointer-events:none}
+.report-calendar button:focus-visible,.report-calendar select:focus-visible{outline:2px solid #0ea5e9;outline-offset:2px}@media(max-width:400px){.report-calendar{padding:18px}.report-calendar-day{height:36px}}
+</style>
 </head>
 <body class="bg-white text-black min-h-screen">
     <!-- HTML注释: 整体宽度通过 max-w-4xl 控制，实现日报宽度调小并保持响应式。-->
@@ -702,8 +714,7 @@
                     </h1>
                     <div class="flex flex-col sm:flex-row justify-center items-center space-y-2 sm:space-y-0 sm:space-x-6 text-lg mb-4">
                         <div class="flex items-center text-gray-700">
-                            <i class="fas fa-calendar-alt mr-2 text-[#0EA5E9]"></i>
-                            <span id="report-date">2026年11月8日</span>
+                            <button type="button" class="report-date-trigger" aria-haspopup="dialog" aria-expanded="false"><i class="fas fa-calendar-alt text-[#0EA5E9]"></i><span id="report-date">2026年11月8日</span></button>
                         </div>
                         <div class="flex items-center text-gray-700">
                             <i class="fas fa-clock mr-2 text-[#0EA5E9]"></i>
@@ -2757,6 +2768,51 @@
         if (dt && pool[idx].date) { dt.textContent = pool[idx].date; }
     });
 })();
+</script>
+<script>
+(function(config) {
+ const first=config.first,base=config.base,prefix=config.prefix,dateEl=document.getElementById('report-date'),trigger=document.querySelector('.report-date-trigger');
+ if(!dateEl||!trigger)return;
+ const pad=n=>String(n).padStart(2,'0'),iso=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+ const url=d=>base+encodeURIComponent(prefix+d+'.html'),m=dateEl.textContent.match(/(\d{4})\s*[年-]\s*(\d{1,2})\s*[月-]\s*(\d{1,2})/),current=m?m[1]+'-'+pad(m[2])+'-'+pad(m[3]):'';
+ const overlay=document.createElement('div');overlay.className='report-calendar-overlay';overlay.hidden=true;
+ overlay.innerHTML='<div class="report-calendar" role="dialog" aria-modal="true" aria-label="选择日报日期"><div class="report-calendar-top"><strong>选择日期</strong><button type="button" class="report-calendar-close" aria-label="关闭"><i class="fas fa-times" aria-hidden="true"></i></button></div><div class="report-calendar-controls"><button type="button" class="report-calendar-nav prev" aria-label="上个月">‹</button><select class="year" aria-label="年份"></select><select class="month" aria-label="月份"></select><button type="button" class="report-calendar-nav next" aria-label="下个月">›</button></div><div class="report-calendar-grid week" aria-hidden="true"></div><div class="report-calendar-grid days"></div></div>';
+ document.body.appendChild(overlay);
+ const year=overlay.querySelector('.year'),month=overlay.querySelector('.month'),days=overlay.querySelector('.days'),prev=overlay.querySelector('.prev'),next=overlay.querySelector('.next');
+ overlay.querySelector('.week').innerHTML=['日','一','二','三','四','五','六'].map(x=>'<span class="report-calendar-week">'+x+'</span>').join('');
+ let view,today,state,version=0,savedScroll=0,savedBodyStyle;
+ function close(){overlay.hidden=true;trigger.setAttribute('aria-expanded','false');Object.assign(document.body.style,savedBodyStyle);window.scrollTo(0,savedScroll);trigger.focus({preventScroll:true});}
+ function render(){
+  year.innerHTML='';for(let y=Number(first.slice(0,4));y<=today.getFullYear();y++)year.add(new Option(y+'年',y,false,y===view.getFullYear()));
+  month.innerHTML='';for(let n=0;n<12;n++){const o=new Option((n+1)+'月',n,false,n===view.getMonth()),key=view.getFullYear()+'-'+pad(n+1);o.disabled=key<first.slice(0,7)||key>iso(today).slice(0,7);month.add(o);}
+  const key=iso(view).slice(0,7);prev.disabled=key<=first.slice(0,7);next.disabled=key>=iso(today).slice(0,7);
+  days.innerHTML='';for(let i=0;i<view.getDay();i++)days.appendChild(document.createElement('span'));
+  for(let n=1;n<=new Date(view.getFullYear(),view.getMonth()+1,0).getDate();n++){
+   const date=iso(new Date(view.getFullYear(),view.getMonth(),n)),b=document.createElement('button');b.type='button';b.className='report-calendar-day';b.textContent=n;
+   b.setAttribute('aria-label',view.getFullYear()+'年'+(view.getMonth()+1)+'月'+n+'日');
+   if(date===current){b.classList.add('current');b.setAttribute('aria-current','date');}if(date===iso(today))b.classList.add('today');
+   b.disabled=date<first||date>iso(today);
+   if(date===iso(today)&&state!=='available'){
+    b.setAttribute('aria-disabled','true');
+    if(state!=='loading'){
+     const tip='今日日报将于次日更新';
+     b.setAttribute('data-tip',tip);b.setAttribute('aria-label',b.getAttribute('aria-label')+'，'+tip);
+    }
+   }
+   b.addEventListener('click',()=>{if(b.getAttribute('aria-disabled')!=='true')window.location.href=url(date)});days.appendChild(b);
+  }
+ }
+ prev.addEventListener('click',()=>{view=new Date(view.getFullYear(),view.getMonth()-1,1);render()});
+ next.addEventListener('click',()=>{view=new Date(view.getFullYear(),view.getMonth()+1,1);render()});
+ year.addEventListener('change',()=>{view=new Date(Number(year.value),view.getMonth(),1);if(iso(view).slice(0,7)<first.slice(0,7))view=new Date(Number(first.slice(0,4)),Number(first.slice(5,7))-1,1);if(iso(view).slice(0,7)>iso(today).slice(0,7))view=new Date(today.getFullYear(),today.getMonth(),1);render()});
+ month.addEventListener('change',()=>{view=new Date(view.getFullYear(),Number(month.value),1);render()});
+ overlay.querySelector('.report-calendar-close').addEventListener('click',close);overlay.addEventListener('click',e=>{if(e.target===overlay)close()});document.addEventListener('keydown',e=>{if(!overlay.hidden&&e.key==='Escape')close()});
+ trigger.addEventListener('click',async()=>{
+  today=new Date();today.setHours(0,0,0,0);const t=iso(today),initial=current&&current>=first&&current<=t?current:t;
+  view=new Date(Number(initial.slice(0,4)),Number(initial.slice(5,7))-1,1);state='loading';const v=++version;savedScroll=window.scrollY;savedBodyStyle={};['position','top','left','right','width','overflow'].forEach(k=>savedBodyStyle[k]=document.body.style[k]);Object.assign(document.body.style,{position:'fixed',top:'-'+savedScroll+'px',left:'0',right:'0',width:'100%',overflow:'hidden'});overlay.hidden=false;trigger.setAttribute('aria-expanded','true');render();overlay.querySelector('.report-calendar-close').focus();
+  try{const r=await fetch(url(t),{method:'HEAD',cache:'no-store',signal:AbortSignal.timeout(8000)});if(v!==version)return;state=r.ok&&!r.redirected?'available':r.status===404?'missing':'unknown'}catch(e){if(v!==version)return;state='unknown'}render();
+ });
+})({"first": "2026-11-06", "base": "https://sihai-zy.github.io/four-seas/", "prefix": "fourseas_daily_"});
 </script>
 </body>
 </html>
