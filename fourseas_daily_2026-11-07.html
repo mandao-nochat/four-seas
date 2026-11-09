@@ -2397,10 +2397,14 @@
             const allChildren = Array.from(card.children);
             const captureElements = [];
 
+            const includeConclusions = !!section && ['section-hot-topics', 'section-meeting'].includes(section.id);
+
             for (const child of allChildren) {
                 if (child.classList.contains('screenshot-btn')) continue;
-                const conclusionLabel = child.querySelector('p.text-sm.font-semibold');
-                if (conclusionLabel && conclusionLabel.textContent.includes('关键结论')) break;
+                if (!includeConclusions) {
+                    const conclusionLabel = child.querySelector('p.text-sm.font-semibold');
+                    if (conclusionLabel && conclusionLabel.textContent.includes('关键结论')) break;
+                }
                 captureElements.push(child);
             }
 
