@@ -32,6 +32,22 @@
 
         html { scroll-behavior: smooth; }
 
+        /* 每日一签/星空弹卡里的日期链接：平时低调，悬停亮出下划线+小箭头 */
+        .quote-date-link {
+            color: #0369A1;
+            font-weight: 600;
+            text-decoration: none;
+            transition: color 0.15s ease;
+        }
+        .quote-date-link:hover { color: #075985; text-decoration: underline; }
+        .quote-date-link i {
+            font-size: 9px;
+            margin-left: 3px;
+            opacity: 0;
+            transition: opacity 0.15s ease;
+        }
+        .quote-date-link:hover i { opacity: 1; }
+
         .text-brand { color: #0369A1; }
         .bg-brand { background-color: #0EA5E9; }
 
@@ -501,6 +517,19 @@
 
             const QUOTES = window.PUBLIC_QUOTES || [];
 
+            // 金句日期 → 当期日报链接（换一句时随金句动态重建）
+            function escHtml(s) {
+                return String(s || '').replace(/[&<>"']/g, function (c) {
+                    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+                });
+            }
+            function dateLinkHtml(q) {
+                const d = q.date || '';
+                return d
+                    ? '<a href="fourseas_daily_' + escHtml(d) + '.html" target="_blank" rel="noopener" class="quote-date-link" title="阅读 ' + escHtml(d) + ' 日报">' + escHtml(d) + '<i class="fas fa-arrow-right"></i></a>'
+                    : '';
+            }
+
             // ============ 每日一签 ============
             const dqText = document.getElementById('daily-quote-text');
             const dqAuthor = document.getElementById('daily-quote-author');
@@ -510,7 +539,7 @@
                 if (!q) return;
                 dqText.textContent = q.text;
                 dqAuthor.textContent = '群友金句';
-                dqMeta.textContent = (q.section || '四海') + ' · ' + (q.date || '');
+                dqMeta.innerHTML = escHtml(q.section || '四海') + ' · ' + dateLinkHtml(q);
             }
             function shuffleDailyQuote() {
                 if (!QUOTES.length) return;
@@ -529,7 +558,7 @@
                 if (!QUOTES.length) return;
                 const q = QUOTES[Math.floor(Math.random() * QUOTES.length)];
                 popupText.textContent = q.text;
-                popupMeta.textContent = '群友金句 · ' + (q.section || '') + ' · ' + (q.date || '');
+                popupMeta.innerHTML = '群友金句 · ' + escHtml(q.section || '') + ' · ' + dateLinkHtml(q);
 
                 popup.classList.remove('hidden');
                 // 定位到点击处附近，并限制在卡片内
