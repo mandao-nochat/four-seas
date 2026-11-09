@@ -2386,7 +2386,7 @@
                 const headerRow = isHeaderRow
                     ? clone
                     : clone.querySelector('[class*="flex"][class*="flex-col"]');
-                if (headerRow) {
+                if (headerRow && headerRow.querySelector('h4')) {
                     headerRow.style.cssText = 'position:relative; min-height:40px; padding-right:150px; margin-bottom:16px; box-sizing:border-box;';
                     headerRow.className = '';
                     const h4 = headerRow.querySelector('h4');
