@@ -2790,10 +2790,6 @@ window.CASES = [
       {
         "text": "左肝右肺如射雕",
         "author": "美丽心情123（拒接微信通话）"
-      },
-      {
-        "text": "有用的",
-        "author": "云端筑梦🐰"
       }
     ],
     "link": "fourseas_daily_2026-11-13.html"
